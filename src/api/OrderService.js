@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "https://sovwva7.fvds.ru/api/order";
+const API_URL = "http://sovwva7.fvds.ru/api/order/";
 
 // Получение всех заказов
 export const fetchOrders = async (token) => {

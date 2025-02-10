@@ -1,20 +1,20 @@
 import React, { useState, useEffect } from "react";
-import { getAllClients, addClient, updateClient, deleteClient } from "../services/database";
+import { fetchClients, createClient, updateClient, deleteClient } from "../api/ClientService";
 import AddClientModal from "../components/AddClientModal";
 
-const Clients = () => {
+const Clients = ({ token }) => {
   const [clients, setClients] = useState([]);
   const [editingClient, setEditingClient] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [addModalOpen, setAddModalOpen] = useState(false);
 
   useEffect(() => {
-    const fetchClients = async () => {
-      const clients = await getAllClients();
-      setClients(clients);
+    const loadClients = async () => {
+      const clientsData = await fetchClients(token);
+      setClients(clientsData);
     };
-    fetchClients();
-  }, []);
+    loadClients();
+  }, [token]);
 
   const handleEdit = (client) => {
     setEditingClient(client);
@@ -22,20 +22,25 @@ const Clients = () => {
   };
 
   const handleDelete = async (id) => {
-    await deleteClient(id);
-    setClients(clients.filter((client) => client.id !== id));
+    const success = await deleteClient(id, token);
+    if (success) {
+      setClients(clients.filter((client) => client.id !== id));
+    }
   };
 
   const handleSave = async () => {
-    await updateClient(editingClient);
-    setClients(clients.map((client) => (client.id === editingClient.id ? editingClient : client)));
+    const updatedClient = await updateClient(editingClient.id, editingClient, token);
+    if (updatedClient) {
+      setClients(clients.map(client => client.id === editingClient.id ? updatedClient : client));
+    }
     setModalOpen(false);
   };
 
   const handleAddClient = async (newClient) => {
-    const clientWithId = { ...newClient, id: Date.now() };
-    await addClient(clientWithId);
-    setClients([...clients, clientWithId]);
+    const createdClient = await createClient(newClient, token);
+    if (createdClient) {
+      setClients([...clients, createdClient]);
+    }
   };
 
   return (
@@ -100,11 +105,7 @@ const Clients = () => {
         </div>
       )}
 
-      <AddClientModal
-        isOpen={addModalOpen}
-        onClose={() => setAddModalOpen(false)}
-        onSave={handleAddClient}
-      />
+      <AddClientModal isOpen={addModalOpen} onClose={() => setAddModalOpen(false)} onSave={handleAddClient} />
 
       <style jsx="true">{`
         .clients-container {
