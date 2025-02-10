@@ -1,6 +1,7 @@
 import axios from "axios";
+import config from "../config";
 
-const API_URL = "http://sovwva7.fvds.ru/api/client/";
+const API_URL = config.BASE_URL + "/client/";
 
 // Получение всех клиентов
 export const fetchClients = async (token) => {

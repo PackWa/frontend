@@ -1,6 +1,7 @@
 import axios from "axios";
+import config from "../config";
 
-const API_URL = "http://sovwva7.fvds.ru/api/product/";
+const API_URL = config.BASE_URL + "/product/";
 
 // Получение всех продуктов
 export const fetchProducts = async (token) => {
