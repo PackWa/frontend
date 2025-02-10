@@ -1,26 +1,39 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import '../App.css';
+import { registerUser } from '../api/authorizationService';
 
 const Register = () => {
-    const [firstName, setFirstName] = useState("");
-    const [lastName, setLastName] = useState("");
+    const [first_name, setFirstName] = useState("");
+    const [last_name, setLastName] = useState("");
     const [phone, setPhone] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-    const [confirmPassword, setConfirmPassword] = useState("");
-    const [errorMessage, setErrorMessage] = useState("");
+    const [confirm_password, setConfirmPassword] = useState("");
+    const [error_message, setErrorMessage] = useState("");
+    const [isLoading, setIsLoading] = useState(false); // Статус загрузки
+    const navigate = useNavigate(); // Используем useNavigate
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if (password !== confirmPassword) {
+        if (password !== confirm_password) {
             setErrorMessage("Пароли не совпадают");
             return;
         }
 
-        // Логика регистрации
-        console.log("Регистрация с данными:", { firstName, lastName, phone, email, password });
+        setIsLoading(true);
+        setErrorMessage(""); // Сбрасываем ошибку перед отправкой
+
+        try {
+            const response = await registerUser({ first_name, last_name, phone, email, password });
+            console.log(response.message); // Ответ от сервера
+            navigate("/login"); // Перенаправляем на страницу логина
+        } catch (error) {
+            setErrorMessage(error.message); // Показываем ошибку
+        } finally {
+            setIsLoading(false); // Останавливаем индикатор загрузки
+        }
     };
 
     return (
@@ -29,22 +42,22 @@ const Register = () => {
                 <h1>Регистрация</h1>
                 <form onSubmit={handleSubmit} className="register-form">
                     <div className="form-group">
-                        <label htmlFor="firstName">Имя:</label>
+                        <label htmlFor="first_name">Имя:</label>
                         <input
                             type="text"
-                            id="firstName"
-                            value={firstName}
+                            id="first_name"
+                            value={first_name}
                             onChange={(e) => setFirstName(e.target.value)}
                             required
                         />
                     </div>
 
                     <div className="form-group">
-                        <label htmlFor="lastName">Фамилия:</label>
+                        <label htmlFor="last_name">Фамилия:</label>
                         <input
                             type="text"
-                            id="lastName"
-                            value={lastName}
+                            id="last_name"
+                            value={last_name}
                             onChange={(e) => setLastName(e.target.value)}
                             required
                         />
@@ -84,20 +97,20 @@ const Register = () => {
                     </div>
 
                     <div className="form-group">
-                        <label htmlFor="confirmPassword">Подтвердите пароль:</label>
+                        <label htmlFor="confirm_password">Подтвердите пароль:</label>
                         <input
                             type="password"
-                            id="confirmPassword"
-                            value={confirmPassword}
+                            id="confirm_password"
+                            value={confirm_password}
                             onChange={(e) => setConfirmPassword(e.target.value)}
                             required
                         />
                     </div>
 
-                    {errorMessage && <p className="error-message">{errorMessage}</p>}
+                    {error_message && <p className="error-message">{error_message}</p>}
 
-                    <button type="submit" className="submit-button">
-                        Зарегистрироваться
+                    <button type="submit" className="submit-button" disabled={isLoading}>
+                        {isLoading ? "Загрузка..." : "Зарегистрироваться"}
                     </button>
                 </form>
 
