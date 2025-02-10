@@ -1,23 +1,31 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import '../App.css';
+import { loginUser } from '../api/authorizationService';
 
 const Login = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-    const [errorMessage, setErrorMessage] = useState("");
+    const [error_message, setErrorMessage] = useState("");
+    const [isLoading, setIsLoading] = useState(false);
+    const navigate = useNavigate(); // Используем useNavigate
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
-        // Логика логина (временно log)
-        console.log("Логин с данными:", { email, password });
-        if (!email || !password) {
-            setErrorMessage("Пожалуйста, заполните все поля.");
-            return;
-        }
+        setIsLoading(true);
+        setErrorMessage(""); // Сбрасываем ошибку перед отправкой
 
-        // Для настоящего логина добавьте реальную проверку
+        try {
+            const response = await loginUser({ email, password });
+            console.log(response.message); // Ответ от сервера
+            localStorage.setItem("access_token", response.access_token); // Сохраняем токен
+            navigate("/"); // Перенаправляем на главную страницу
+        } catch (error) {
+            setErrorMessage(error.message); // Показываем ошибку
+        } finally {
+            setIsLoading(false); // Останавливаем индикатор загрузки
+        }
     };
 
     return (
@@ -47,10 +55,10 @@ const Login = () => {
                         />
                     </div>
 
-                    {errorMessage && <p className="error-message">{errorMessage}</p>}
+                    {error_message && <p className="error-message">{error_message}</p>}
 
-                    <button type="submit" className="submit-button">
-                        Войти
+                    <button type="submit" className="submit-button" disabled={isLoading}>
+                        {isLoading ? "Загрузка..." : "Войти"}
                     </button>
                 </form>
 
