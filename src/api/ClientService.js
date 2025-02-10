@@ -1,6 +1,7 @@
 import axios from "axios";
+import config from "../config";
 
-const API_URL = "http://sovwva7.fvds.ru/api/client/";
+const API_URL = config.BASE_URL + "/client/";
 
 // Получение всех клиентов
 export const fetchClients = async (token) => {
@@ -34,7 +35,7 @@ export const createClient = async (clientData, token) => {
 // Обновление клиента
 export const updateClient = async (clientId, updatedData, token) => {
   try {
-    const response = await axios.put(`${API_URL}/${clientId}`, updatedData, {
+    const response = await axios.put(`${API_URL}${clientId}`, updatedData, {
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
@@ -50,7 +51,7 @@ export const updateClient = async (clientId, updatedData, token) => {
 // Удаление клиента
 export const deleteClient = async (clientId, token) => {
   try {
-    await axios.delete(`${API_URL}/${clientId}`, {
+    await axios.delete(`${API_URL}${clientId}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     return true;

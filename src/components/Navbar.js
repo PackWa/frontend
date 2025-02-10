@@ -1,43 +1,54 @@
-import React, {useEffect, useState} from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { FiMenu, FiX } from "react-icons/fi";
 
 const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
 
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
+  useEffect(() => {
+    const token = localStorage.getItem("access_token");
+    if (token) {
+      setIsLoggedIn(true);
+    }
 
-    useEffect(() => {
-        // Проверка наличия accessToken в localStorage
-        const token = localStorage.getItem("accessToken");
-        if (token) {
-            setIsLoggedIn(true); // Если токен есть, считаем, что пользователь залогинен
-        }
-    }, []);
+    const updateOnlineStatus = () => {
+      setIsOnline(navigator.onLine);
+    };
+
+    window.addEventListener("online", updateOnlineStatus);
+    window.addEventListener("offline", updateOnlineStatus);
+    
+    return () => {
+      window.removeEventListener("online", updateOnlineStatus);
+      window.removeEventListener("offline", updateOnlineStatus);
+    };
+  }, []);
 
   const toggleMenu = () => {
     setMenuOpen(!menuOpen);
   };
 
-    const handleLogout = () => {
-        localStorage.removeItem("accessToken"); // Удаляем токен при выходе
-        setIsLoggedIn(false); // Обновляем состояние
-    };
+  const handleLogout = () => {
+    localStorage.removeItem("access_token");
+    setIsLoggedIn(false);
+  };
 
   return (
     <>
-      {/* Верхняя черная панель */}
       <header className="navbar">
         <button className="menu-button" onClick={toggleMenu}>
           <FiMenu size={30} />
         </button>
         <h1 className="logo">Менеджер</h1>
+        <div className="status" style={{ color: isOnline ? "#4CAF50" : "#F44336" }}>
+          {isOnline ? "Онлайн" : "Оффлайн"}
+        </div>
       </header>
 
-      {/* Затемнение фона */}
       {menuOpen && <div className="overlay" onClick={toggleMenu}></div>}
 
-      {/* Боковое меню */}
       <nav className={`side-menu ${menuOpen ? "open" : ""}`}>
         <button className="close-button" onClick={toggleMenu}>
           <FiX size={30} />
@@ -47,15 +58,15 @@ const Navbar = () => {
           <li><Link to="/clients" onClick={toggleMenu}>Клиенты</Link></li>
           <li><Link to="/products" onClick={toggleMenu}>Продукты</Link></li>
           <li><Link to="/profile" onClick={toggleMenu}>Профиль</Link></li>
-            {!isLoggedIn ? (
-                <li><Link to="/register" onClick={toggleMenu}>Регистрация</Link></li>
-            ) : (
-                <li>
-                    <button className="logout-button" onClick={handleLogout} style={{ color: "red" }}>
-                        Выход
-                    </button>
-                </li>
-            )}
+          {!isLoggedIn ? (
+            <li><Link to="/register" onClick={toggleMenu}>Регистрация</Link></li>
+          ) : (
+            <li>
+              <button className="logout-button" onClick={handleLogout} style={{ color: "red" }}>
+                Выход
+              </button>
+            </li>
+          )}
         </ul>
       </nav>
 
@@ -70,8 +81,15 @@ const Navbar = () => {
           background: black;
           display: flex;
           align-items: center;
-          padding: 0 20px;
+          justify-content: space-between;
+          padding: 0;
           z-index: 103;
+        }
+        
+        .status {
+          font-size: 22px;
+          font-weight: bold;
+          margin-right: 20px;
         }
 
         .logo {

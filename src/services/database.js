@@ -4,6 +4,7 @@ const DB_VERSION = 1;
 const CLIENTS_STORE = "clients";
 const PRODUCTS_STORE = "products";
 const PRODUCTS_PHOTO = "photos";
+const ORDERS_STORE = "orders";
 
 const openDB = () => {
   return new Promise((resolve, reject) => {
@@ -16,6 +17,9 @@ const openDB = () => {
       }
       if (!db.objectStoreNames.contains(PRODUCTS_STORE)) {
         db.createObjectStore(PRODUCTS_STORE, { keyPath: "id" });
+      }
+      if (!db.objectStoreNames.contains(ORDERS_STORE)) {
+        db.createObjectStore(ORDERS_STORE, { keyPath: "id" });
       }
       if (!db.objectStoreNames.contains(PRODUCTS_PHOTO)) {
         db.createObjectStore(PRODUCTS_PHOTO, { keyPath: "id" });
@@ -45,23 +49,13 @@ export const addClient = async (client) => {
   const db = await openDB();
   const store = getStore(db, CLIENTS_STORE, "readwrite");
   return new Promise((resolve, reject) => {
-    const request = store.add(client);
-    request.onsuccess = () => resolve();
-    request.onerror = () => reject(request.error);
-  });
-};
-
-export const updateClient = async (client) => {
-  const db = await openDB();
-  const store = getStore(db, CLIENTS_STORE, "readwrite");
-  return new Promise((resolve, reject) => {
     const request = store.put(client);
     request.onsuccess = () => resolve();
     request.onerror = () => reject(request.error);
   });
 };
 
-export const deleteClient = async (id) => {
+export const deleteClientFromDB = async (id) => {
   const db = await openDB();
   const store = getStore(db, CLIENTS_STORE, "readwrite");
   return new Promise((resolve, reject) => {
@@ -151,6 +145,36 @@ export const savePhotoToIndexedDB = async (productId, photoBase64) => {
   export const deleteProductDB = async (id) => {
     const db = await openDB();
     const store = getStore(db, PRODUCTS_STORE, "readwrite");
+    return new Promise((resolve, reject) => {
+      const request = store.delete(id);
+      request.onsuccess = () => resolve();
+      request.onerror = () => reject(request.error);
+    });
+  };
+
+  export const getAllOrders = async () => {
+    const db = await openDB();
+    const store = getStore(db, ORDERS_STORE);
+    return new Promise((resolve, reject) => {
+      const request = store.getAll();
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+  };
+
+  export const addOrder = async (order) => {
+    const db = await openDB();
+    const store = getStore(db, ORDERS_STORE, "readwrite");
+    return new Promise((resolve, reject) => {
+      const request = store.put(order);
+      request.onsuccess = () => resolve();
+      request.onerror = () => reject(request.error);
+    });
+  };
+
+  export const deleteOrderFromDB = async (id) => {
+    const db = await openDB();
+    const store = getStore(db, ORDERS_STORE, "readwrite");
     return new Promise((resolve, reject) => {
       const request = store.delete(id);
       request.onsuccess = () => resolve();

@@ -1,16 +1,24 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 const AddClientModal = ({ isOpen, onClose, onSave }) => {
-  const [name, setName] = useState("");
-  const [surname, setSurname] = useState("");
+  const [first_name, setFirstName] = useState("");
+  const [last_name, setLastName] = useState("");
   const [phone, setPhone] = useState("");
 
+  useEffect(() => {
+    if (isOpen) {
+      setFirstName("");
+      setLastName("");
+      setPhone("");
+    }
+  }, [isOpen]);
+
   const handleSave = () => {
-    if (!name || !surname || !phone) {
+    if (!first_name || !last_name || !phone) {
       alert("Заполните все поля!");
       return;
     }
-    onSave({ name, surname, phone });
+    onSave({ first_name, last_name, phone });
     onClose();
   };
 
@@ -23,14 +31,14 @@ const AddClientModal = ({ isOpen, onClose, onSave }) => {
         <input
           type="text"
           placeholder="Имя"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
+          value={first_name}
+          onChange={(e) => setFirstName(e.target.value)}
         />
         <input
           type="text"
           placeholder="Фамилия"
-          value={surname}
-          onChange={(e) => setSurname(e.target.value)}
+          value={last_name}
+          onChange={(e) => setLastName(e.target.value)}
         />
         <input
           type="text"

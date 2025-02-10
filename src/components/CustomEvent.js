@@ -5,7 +5,7 @@ const CustomEvent = ({ event }) => {
   return (
     <div className="custom-event">
       <strong>{event.title}</strong>
-      <div>Клиент: {event.client}</div>
+      <div>Клиент: {event.client_name}</div>
       <div>Адрес: {event.address}</div>
       <div>Время: {moment(event.start).format("HH:mm")}</div>
       <div>Продукты:</div>
