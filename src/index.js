@@ -14,4 +14,4 @@ root.render(
 );
 
 Modal.setAppElement('#root');
-serviceWorkerRegistration.unregister();
+serviceWorkerRegistration.register();
