@@ -1,23 +1,46 @@
 import React, { useState, useEffect } from "react";
-import { getAllProducts, addProduct } from "../services/database";
+import { fetchProducts, createProduct, updateProduct, deleteProduct, fetchProductPhoto } from "../api/ProductService";
 import AddProductModal from "../components/AddProductModal";
 
-const Products = () => {
+const Products = ({ token }) => {
   const [products, setProducts] = useState([]);
   const [addModalOpen, setAddModalOpen] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [editingProduct, setEditingProduct] = useState(null);
 
   useEffect(() => {
-    const fetchProducts = async () => {
-      const products = await getAllProducts();
-      setProducts(products);
+    const loadProducts = async () => {
+      const productsData = await fetchProducts(token);
+      setProducts(productsData);
     };
-    fetchProducts();
-  }, []);
+    loadProducts();
+  }, [token]);
 
   const handleAddProduct = async (newProduct) => {
-    const productWithId = { ...newProduct, id: Date.now() };
-    await addProduct(productWithId);
-    setProducts([...products, productWithId]);
+    const createdProduct = await createProduct(newProduct, token);
+    if (createdProduct) {
+      setProducts([...products, createdProduct]);
+    }
+  };
+
+  const handleEditProduct = (product) => {
+    setEditingProduct(product);
+    setEditModalOpen(true);
+  };
+
+  const handleUpdateProduct = async (updatedProduct) => {
+    const updated = await updateProduct(updatedProduct.id, updatedProduct, token);
+    if (updated) {
+      setProducts(products.map((p) => (p.id === updated.id ? updated : p)));
+    }
+    setEditModalOpen(false);
+  };
+
+  const handleDeleteProduct = async (id) => {
+    const success = await deleteProduct(id, token);
+    if (success) {
+      setProducts(products.filter((product) => product.id !== id));
+    }
   };
 
   return (
@@ -30,19 +53,18 @@ const Products = () => {
       <div className="products-grid">
         {products.map((product) => (
           <div key={product.id} className="product-card">
-            <img src={URL.createObjectURL(product.image)} alt={product.name} />
+            <img src={fetchProductPhoto(product.photo)} alt={product.name} />
             <h3>{product.name}</h3>
             <p>{product.description}</p>
-            <p>{product.price}</p>
+            <p>{product.price} ₽</p>
+            <button onClick={() => handleEditProduct(product)}>Редактировать</button>
+            <button onClick={() => handleDeleteProduct(product.id)}>Удалить</button>
           </div>
         ))}
       </div>
 
-      <AddProductModal
-        isOpen={addModalOpen}
-        onClose={() => setAddModalOpen(false)}
-        onSave={handleAddProduct}
-      />
+      <AddProductModal isOpen={addModalOpen} onClose={() => setAddModalOpen(false)} onSave={handleAddProduct} />
+      <AddProductModal isOpen={editModalOpen} onClose={() => setEditModalOpen(false)} onSave={handleUpdateProduct} product={editingProduct} />
 
       <style jsx="true">{`
         .products-container {
