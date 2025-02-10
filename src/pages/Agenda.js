@@ -7,6 +7,7 @@ import EditOrderModal from "../components/EditOrderModal";
 import CustomEvent from "../components/CustomEvent";
 import { fetchOrders, createOrder, updateOrder, deleteOrder } from "../api/OrderService";
 import { fetchClients } from "../api/ClientService";
+import { getAllOrders, addOrder, deleteOrderFromDB } from "../services/database";
 
 const localizer = momentLocalizer(moment);
 
@@ -15,28 +16,56 @@ const Agenda = () => {
   const [editModalIsOpen, setEditModalIsOpen] = useState(false);
   const [events, setEvents] = useState([]);
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
   const token = localStorage.getItem("access_token");
 
   useEffect(() => {
     const loadOrders = async () => {
       if (!token) return;
-      const [orders, clients] = await Promise.all([fetchOrders(token), fetchClients(token)]);
-      
-      const clientsMap = clients.reduce((map, client) => {
-        map[client.id] = `${client.first_name} ${client.last_name}`;
-        return map;
-      }, {});
-  
-      setEvents(orders.map(order => ({
-        ...order,
-        start: new Date(order.date),
-        end: new Date(order.date),
-        client_name: clientsMap[order.client_id] || "Не указан",
-      })));
+
+      if (isOnline) {
+        try {
+          const [orders, clients] = await Promise.all([fetchOrders(token), fetchClients(token)]);
+
+          const clientsMap = clients.reduce((map, client) => {
+            map[client.id] = `${client.first_name} ${client.last_name}`;
+            return map;
+          }, {});
+
+          const processedOrders = orders.map(order => ({
+            ...order,
+            start: new Date(order.date),
+            end: new Date(order.date),
+            client_name: clientsMap[order.client_id] || "Не указан",
+          }));
+
+          setEvents(processedOrders);
+          processedOrders.forEach(addOrder); // Сохраняем заказы в IndexedDB
+        } catch (error) {
+          console.error("Ошибка загрузки заказов:", error);
+        }
+      } else {
+        const localOrders = await getAllOrders();
+        setEvents(localOrders);
+      }
     };
+
     loadOrders();
-  }, [token]);
-  
+  }, [token, isOnline]);
+
+  useEffect(() => {
+    const updateOnlineStatus = () => {
+      setIsOnline(navigator.onLine);
+    };
+
+    window.addEventListener("online", updateOnlineStatus);
+    window.addEventListener("offline", updateOnlineStatus);
+
+    return () => {
+      window.removeEventListener("online", updateOnlineStatus);
+      window.removeEventListener("offline", updateOnlineStatus);
+    };
+  }, []);
 
   const openCreateModal = () => {
     setSelectedOrder(null);
@@ -66,24 +95,34 @@ const Agenda = () => {
         quantity: product.quantity || 1,
       }))
     };
-    
+
     if (order.id) {
-      const updatedOrder = await updateOrder(order.id, formattedOrder, token);
-      if (updatedOrder) {
-        setEvents(events.map(evt => (evt.id === order.id ? {
-          ...updatedOrder,
-          start: new Date(updatedOrder.date),
-          end: new Date(updatedOrder.date),
-        } : evt)));
+      if (isOnline) {
+        const updatedOrder = await updateOrder(order.id, formattedOrder, token);
+        if (updatedOrder) {
+          setEvents(events.map(evt => (evt.id === order.id ? {
+            ...updatedOrder,
+            start: new Date(updatedOrder.date),
+            end: new Date(updatedOrder.date),
+          } : evt)));
+          addOrder(updatedOrder);
+        }
+      } else {
+        addOrder({ ...formattedOrder, id: order.id });
       }
     } else {
-      const createdOrder = await createOrder(formattedOrder, token);
-      if (createdOrder) {
-        setEvents([...events, {
-          ...createdOrder,
-          start: new Date(createdOrder.date),
-          end: new Date(createdOrder.date),
-        }]);
+      if (isOnline) {
+        const createdOrder = await createOrder(formattedOrder, token);
+        if (createdOrder) {
+          setEvents([...events, {
+            ...createdOrder,
+            start: new Date(createdOrder.date),
+            end: new Date(createdOrder.date),
+          }]);
+          addOrder(createdOrder);
+        }
+      } else {
+        addOrder({ ...formattedOrder, id: Date.now() }); // Временный ID
       }
     }
     closeModals();
@@ -91,18 +130,20 @@ const Agenda = () => {
 
   const handleDeleteOrder = async (orderId) => {
     if (!token) return;
-    const success = await deleteOrder(orderId, token);
-    if (success) {
-      const updatedOrders = await fetchOrders(token);
-      setEvents(updatedOrders.map(order => ({
-        ...order,
-        start: new Date(order.date),
-        end: new Date(order.date),
-      })));
-      closeModals();
+
+    if (isOnline) {
+      const success = await deleteOrder(orderId, token);
+      if (success) {
+        setEvents(events.filter(event => event.id !== orderId));
+        deleteOrderFromDB(orderId);
+      }
+    } else {
+      setEvents(events.filter(event => event.id !== orderId));
+      deleteOrderFromDB(orderId);
     }
+
+    closeModals();
   };
-  
 
   return (
     <div className="agenda-container">
