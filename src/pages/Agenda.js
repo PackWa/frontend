@@ -6,6 +6,7 @@ import OrderModal from "../components/OrderModal";
 import EditOrderModal from "../components/EditOrderModal";
 import CustomEvent from "../components/CustomEvent";
 import { fetchOrders, createOrder, updateOrder, deleteOrder } from "../api/OrderService";
+import { fetchClients } from "../api/ClientService";
 
 const localizer = momentLocalizer(moment);
 
@@ -19,15 +20,23 @@ const Agenda = () => {
   useEffect(() => {
     const loadOrders = async () => {
       if (!token) return;
-      const orders = await fetchOrders(token);
+      const [orders, clients] = await Promise.all([fetchOrders(token), fetchClients(token)]);
+      
+      const clientsMap = clients.reduce((map, client) => {
+        map[client.id] = `${client.first_name} ${client.last_name}`;
+        return map;
+      }, {});
+  
       setEvents(orders.map(order => ({
         ...order,
         start: new Date(order.date),
         end: new Date(order.date),
+        client_name: clientsMap[order.client_id] || "Не указан",
       })));
     };
     loadOrders();
   }, [token]);
+  
 
   const openCreateModal = () => {
     setSelectedOrder(null);
@@ -51,7 +60,7 @@ const Agenda = () => {
       title: order.title,
       address: order.address,
       date: order.start,
-      client_id: order.client !== "Не указан" ? parseInt(order.client) || null : null,
+      client_id: order.client_id !== "Не указан" ? parseInt(order.client_id) || null : null,
       products: order.products.map(product => ({
         product_id: product.id,
         quantity: product.quantity || 1,

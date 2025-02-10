@@ -2,14 +2,16 @@ import React, { useState, useEffect } from "react";
 import { fetchClients, createClient, updateClient, deleteClient } from "../api/ClientService";
 import AddClientModal from "../components/AddClientModal";
 
-const Clients = ({ token }) => {
+const Clients = () => {
   const [clients, setClients] = useState([]);
   const [editingClient, setEditingClient] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [addModalOpen, setAddModalOpen] = useState(false);
+  const token = localStorage.getItem("access_token");
 
   useEffect(() => {
     const loadClients = async () => {
+      if (!token) return;
       const clientsData = await fetchClients(token);
       setClients(clientsData);
     };
@@ -22,6 +24,7 @@ const Clients = ({ token }) => {
   };
 
   const handleDelete = async (id) => {
+    if (!token) return;
     const success = await deleteClient(id, token);
     if (success) {
       setClients(clients.filter((client) => client.id !== id));
@@ -29,6 +32,7 @@ const Clients = ({ token }) => {
   };
 
   const handleSave = async () => {
+    if (!token) return;
     const updatedClient = await updateClient(editingClient.id, editingClient, token);
     if (updatedClient) {
       setClients(clients.map(client => client.id === editingClient.id ? updatedClient : client));
@@ -37,6 +41,7 @@ const Clients = ({ token }) => {
   };
 
   const handleAddClient = async (newClient) => {
+    if (!token) return;
     const createdClient = await createClient(newClient, token);
     if (createdClient) {
       setClients([...clients, createdClient]);
@@ -67,8 +72,8 @@ const Clients = ({ token }) => {
             {clients.map((client) => (
               <tr key={client.id}>
                 <td>{client.id}</td>
-                <td>{client.name}</td>
-                <td>{client.surname}</td>
+                <td>{client.first_name}</td>
+                <td>{client.last_name}</td>
                 <td>{client.phone}</td>
                 <td>
                   <button onClick={() => handleEdit(client)}>Редактировать</button>
@@ -86,13 +91,13 @@ const Clients = ({ token }) => {
             <h3>Редактировать клиента</h3>
             <input
               type="text"
-              value={editingClient.name}
-              onChange={(e) => setEditingClient({ ...editingClient, name: e.target.value })}
+              value={editingClient.first_name}
+              onChange={(e) => setEditingClient({ ...editingClient, first_name: e.target.value })}
             />
             <input
               type="text"
-              value={editingClient.surname}
-              onChange={(e) => setEditingClient({ ...editingClient, surname: e.target.value })}
+              value={editingClient.last_name}
+              onChange={(e) => setEditingClient({ ...editingClient, last_name: e.target.value })}
             />
             <input
               type="text"

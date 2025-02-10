@@ -32,7 +32,7 @@ const EditOrderModal = ({ isOpen, onClose, onUpdateOrder, order, onDeleteOrder }
     if (order) {
       setOrderData({
         title: order.title,
-        client: clients.find(client => client.id === order.client_id) || "",
+        client: clients.find(client => client.id === order.client_id) ? { value: order.client_id, label: `${order.client_name}` } : "",
         products: order.products || [],
         time: order.date ? new Date(order.date).toISOString().slice(0, 16) : "",
         address: order.address || "",
@@ -96,7 +96,7 @@ const EditOrderModal = ({ isOpen, onClose, onUpdateOrder, order, onDeleteOrder }
           <Select
             options={clients.map(client => ({
               value: client.id,
-              label: `${client.name} ${client.surname}`,
+              label: `${client.first_name} ${client.last_name}`,
             }))}
             value={orderData.client}
             onChange={(selectedClient) => setOrderData({ ...orderData, client: selectedClient })}

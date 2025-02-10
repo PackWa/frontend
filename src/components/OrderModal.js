@@ -86,7 +86,7 @@ const OrderModal = ({ isOpen, onClose, onAddOrder }) => {
       address: orderData.address,
       total: calculateTotal(),
     };
-
+    console.log(newOrder.client_id)
     onAddOrder(newOrder);
     setOrderData({ title: "", client: "", products: [], time: "", address: "" });
   };
@@ -111,7 +111,7 @@ const OrderModal = ({ isOpen, onClose, onAddOrder }) => {
           <Select
             options={clients.map((client) => ({
               value: client.id,
-              label: `${client.name} ${client.surname}`,
+              label: `${client.first_name} ${client.last_name}`,
             }))}
             value={orderData.client}
             onChange={handleClientChange}
