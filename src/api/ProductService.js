@@ -16,9 +16,39 @@ export const fetchProducts = async (token) => {
 };
 
 // Получение фото продукта
-export const fetchProductPhoto = (filename) => {
-  return `${API_URL}/photo/${filename}`;
+export const fetchProductPhoto = async (token, filename) => {
+  const headers = new Headers();
+  if (token) {
+    headers.append("Authorization", `Bearer ${token}`);
+  }
+
+  const response = await fetch(`${API_URL}photo/${filename}`, {
+    method: "GET",
+    headers: headers,
+  });
+
+  if (!response.ok) {
+    console.error("Ошибка при загрузке фото:", response.statusText);
+    return null;
+  }
+
+  const photoBlob = await response.blob();
+
+  if (photoBlob instanceof Blob) {
+    if (photoBlob.type.startsWith('image/jpeg')) {
+      console.log("Получено изображение JPG");
+      return photoBlob;
+    } else {
+      console.error("Получено не изображение JPG, тип:", photoBlob.type);
+      return null;
+    }
+  } else {
+    console.error("Ошибка: полученный объект не является Blob");
+    return null;
+  }
 };
+
+
 
 // Создание нового продукта
 export const createProduct = async (productData, token) => {
@@ -45,7 +75,7 @@ export const createProduct = async (productData, token) => {
 // Обновление продукта
 export const updateProduct = async (productId, updatedData, token) => {
   try {
-    const response = await axios.put(`${API_URL}/${productId}`, updatedData, {
+    const response = await axios.put(`${API_URL}${productId}`, updatedData, {
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
@@ -61,7 +91,7 @@ export const updateProduct = async (productId, updatedData, token) => {
 // Удаление продукта
 export const deleteProduct = async (productId, token) => {
   try {
-    await axios.delete(`${API_URL}/${productId}`, {
+    await axios.delete(`${API_URL}${productId}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     return true;
