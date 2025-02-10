@@ -1,6 +1,7 @@
 import axios from "axios";
+import config from "../config";
 
-const API_URL = "http://sovwva7.fvds.ru/api/order/";
+const API_URL = config.BASE_URL + "/order/";
 
 // Получение всех заказов
 export const fetchOrders = async (token) => {
@@ -34,7 +35,7 @@ export const createOrder = async (orderData, token) => {
 // Обновление заказа
 export const updateOrder = async (orderId, updatedData, token) => {
   try {
-    const response = await axios.put(`${API_URL}/${orderId}`, updatedData, {
+    const response = await axios.put(`${API_URL}${orderId}`, updatedData, {
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
@@ -50,7 +51,7 @@ export const updateOrder = async (orderId, updatedData, token) => {
 // Удаление заказа
 export const deleteOrder = async (orderId, token) => {
   try {
-    await axios.delete(`${API_URL}/${orderId}`, {
+    await axios.delete(`${API_URL}${orderId}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     return true;
@@ -63,7 +64,7 @@ export const deleteOrder = async (orderId, token) => {
 // Получение заказа по ID
 export const getOrderById = async (orderId, token) => {
     try {
-      const response = await axios.get(`${API_URL}/${orderId}`, {
+      const response = await axios.get(`${API_URL}${orderId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       return response.data;

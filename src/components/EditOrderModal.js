@@ -4,7 +4,7 @@ import ProductList from "./ProductList";
 import { fetchClients } from "../api/ClientService";
 import { fetchProducts } from "../api/ProductService";
 
-const OrderModal = ({ isOpen, onClose, onAddOrder }) => {
+const EditOrderModal = ({ isOpen, onClose, onUpdateOrder, order, onDeleteOrder }) => {
   const [orderData, setOrderData] = useState({
     title: "",
     client: "",
@@ -28,12 +28,21 @@ const OrderModal = ({ isOpen, onClose, onAddOrder }) => {
     fetchData();
   }, [token]);
 
-  const handleChange = (e) => {
-    setOrderData({ ...orderData, [e.target.name]: e.target.value });
-  };
+  useEffect(() => {
+    if (order) {
+      setOrderData({
+        title: order.title,
+        client: clients.find(client => client.id === order.client_id) || "",
+        products: order.products || [],
+        time: order.date ? new Date(order.date).toISOString().slice(0, 16) : "",
+        address: order.address || "",
+      });
+    }
+  }, [order, clients, products]);
 
-  const handleClientChange = (selectedClient) => {
-    setOrderData({ ...orderData, client: selectedClient });
+  const handleDelete = async () => {
+    if (!order || !token) return;
+    onDeleteOrder(order.id);
   };
 
   const handleProductSelect = (e) => {
@@ -47,29 +56,6 @@ const OrderModal = ({ isOpen, onClose, onAddOrder }) => {
     }
   };
 
-  const updateQuantity = (id, quantity) => {
-    setOrderData({
-      ...orderData,
-      products: orderData.products.map((p) =>
-        p.id === id ? { ...p, quantity: Math.max(1, quantity) } : p
-      ),
-    });
-  };
-
-  const removeProduct = (id) => {
-    setOrderData({
-      ...orderData,
-      products: orderData.products.filter((p) => p.id !== id),
-    });
-  };
-
-  const calculateTotal = () => {
-    return orderData.products.reduce(
-      (total, product) => total + (product.price * (product.quantity || 1)),
-      0
-    );
-  };
-
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!orderData.title || !orderData.time || !orderData.address) {
@@ -77,18 +63,17 @@ const OrderModal = ({ isOpen, onClose, onAddOrder }) => {
       return;
     }
 
-    const newOrder = {
+    const updatedOrder = {
+      id: order.id,
       title: orderData.title,
-      start: new Date(orderData.time),
-      end: new Date(orderData.time),
+      date: new Date(orderData.time).toISOString(),
       client_id: orderData.client?.value || null,
       products: orderData.products,
       address: orderData.address,
-      total: calculateTotal(),
     };
 
-    onAddOrder(newOrder);
-    setOrderData({ title: "", client: "", products: [], time: "", address: "" });
+    onUpdateOrder(updatedOrder);
+    onClose();
   };
 
   if (!isOpen) return null;
@@ -96,25 +81,25 @@ const OrderModal = ({ isOpen, onClose, onAddOrder }) => {
   return (
     <div className="modal-overlay">
       <div className="modal-content">
-        <h2>Создать заказ</h2>
+        <h2>Редактировать заказ</h2>
         <form onSubmit={handleSubmit}>
           <label>Название заказа:</label>
           <input
             type="text"
             name="title"
             value={orderData.title}
-            onChange={handleChange}
+            onChange={(e) => setOrderData({ ...orderData, title: e.target.value })}
             required
           />
 
           <label>Клиент:</label>
           <Select
-            options={clients.map((client) => ({
+            options={clients.map(client => ({
               value: client.id,
               label: `${client.name} ${client.surname}`,
             }))}
             value={orderData.client}
-            onChange={handleClientChange}
+            onChange={(selectedClient) => setOrderData({ ...orderData, client: selectedClient })}
             placeholder="Выберите клиента..."
           />
 
@@ -130,16 +115,22 @@ const OrderModal = ({ isOpen, onClose, onAddOrder }) => {
 
           <ProductList
             products={orderData.products}
-            onUpdateQuantity={updateQuantity}
-            onRemoveProduct={removeProduct}
+            onUpdateQuantity={(id, quantity) => setOrderData({
+              ...orderData,
+              products: orderData.products.map(p => (p.id === id ? { ...p, quantity } : p)),
+            })}
+            onRemoveProduct={(id) => setOrderData({
+              ...orderData,
+              products: orderData.products.filter(p => p.id !== id),
+            })}
           />
 
-          <label>Время заказа:</label>
+          <label>Дата и время:</label>
           <input
             type="datetime-local"
             name="time"
             value={orderData.time}
-            onChange={handleChange}
+            onChange={(e) => setOrderData({ ...orderData, time: e.target.value })}
             required
           />
 
@@ -148,20 +139,19 @@ const OrderModal = ({ isOpen, onClose, onAddOrder }) => {
             type="text"
             name="address"
             value={orderData.address}
-            onChange={handleChange}
+            onChange={(e) => setOrderData({ ...orderData, address: e.target.value })}
             required
           />
 
-          <div className="total-price">Итоговая сумма: {calculateTotal()} ₽</div>
-
-          <button type="submit">Добавить заказ</button>
-          <button type="button" onClick={onClose}>
-            Отмена
-          </button>
+          <div className="modal-actions">
+            <button type="submit">Сохранить изменения</button>
+            <button type="button" onClick={onClose}>Отмена</button>
+            <button type="button" className="delete-button" onClick={handleDelete}>Удалить заказ</button>
+          </div>
         </form>
       </div>
     </div>
   );
 };
 
-export default OrderModal;
+export default EditOrderModal;
