@@ -1,13 +1,28 @@
-import React, { useState } from "react";
+import React, {useEffect, useState} from "react";
 import { Link } from "react-router-dom";
 import { FiMenu, FiX } from "react-icons/fi";
 
 const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
 
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+    useEffect(() => {
+        // Проверка наличия accessToken в localStorage
+        const token = localStorage.getItem("accessToken");
+        if (token) {
+            setIsLoggedIn(true); // Если токен есть, считаем, что пользователь залогинен
+        }
+    }, []);
+
   const toggleMenu = () => {
     setMenuOpen(!menuOpen);
   };
+
+    const handleLogout = () => {
+        localStorage.removeItem("accessToken"); // Удаляем токен при выходе
+        setIsLoggedIn(false); // Обновляем состояние
+    };
 
   return (
     <>
@@ -32,6 +47,15 @@ const Navbar = () => {
           <li><Link to="/clients" onClick={toggleMenu}>Клиенты</Link></li>
           <li><Link to="/products" onClick={toggleMenu}>Продукты</Link></li>
           <li><Link to="/profile" onClick={toggleMenu}>Профиль</Link></li>
+            {!isLoggedIn ? (
+                <li><Link to="/register" onClick={toggleMenu}>Регистрация</Link></li>
+            ) : (
+                <li>
+                    <button className="logout-button" onClick={handleLogout} style={{ color: "red" }}>
+                        Выход
+                    </button>
+                </li>
+            )}
         </ul>
       </nav>
 
