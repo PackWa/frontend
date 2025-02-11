@@ -187,30 +187,33 @@ const Agenda = () => {
   };
 
   return (
-    <div className="agenda-container">
+    <div className="main-page">
       <h2>Расписание заказов</h2>
 
       <button className="add-order-btn" onClick={openCreateModal}>
         Добавить заказ
       </button>
 
-      <Calendar
-        localizer={localizer}
-        events={events}
-        startAccessor="start"
-        endAccessor="end"
-        views={["agenda"]}
-        defaultView="agenda"
-        style={{ height: 500, marginTop: 20 }}
-        components={{ event: (props) => (
-          <div onClick={() => openEditModal(props.event)} style={{ cursor: 'pointer' }}>
-            <CustomEvent {...props} />
-          </div>
-        ) }}
-      />
+      <div className="agenda-container">
 
-      <OrderModal isOpen={modalIsOpen} onClose={closeModals} onAddOrder={handleAddOrUpdateOrder} />
-      <EditOrderModal isOpen={editModalIsOpen} onClose={closeModals} onUpdateOrder={handleAddOrUpdateOrder} onDeleteOrder={handleDeleteOrder} order={selectedOrder} />
+        <Calendar
+          localizer={localizer}
+          events={events}
+          startAccessor="start"
+          endAccessor="end"
+          views={["agenda"]}
+          defaultView="agenda"
+          style={{ minHeight: "90%", marginTop: 20 }}
+          components={{ event: (props) => (
+            <div onClick={() => openEditModal(props.event)} style={{ cursor: 'pointer' }}>
+              <CustomEvent {...props} />
+            </div>
+          ) }}
+        />
+
+        <OrderModal isOpen={modalIsOpen} onClose={closeModals} onAddOrder={handleAddOrUpdateOrder} />
+        <EditOrderModal isOpen={editModalIsOpen} onClose={closeModals} onUpdateOrder={handleAddOrUpdateOrder} onDeleteOrder={handleDeleteOrder} order={selectedOrder} />
+      </div>
     </div>
   );
 };

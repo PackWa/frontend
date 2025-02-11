@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { getPhotoFromIndexedDB } from "../services/database";
 
-const AddProductModal = ({ isOpen, onClose, onSave, product, photo }) => {
+import photo from "../assets/camera_placeholder.jpg";
+
+const AddProductModal = ({ isOpen, onClose, onSave, product}) => {
   const [id, setId] = useState("");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
+  const [image, setImage] = useState("");
   const [selectedFile, setSelectedFile] = useState(null);
   const [preview, setPreview] = useState("");
   const [existingPhotoPath, setExistingPhotoPath] = useState("");
@@ -17,15 +20,9 @@ const AddProductModal = ({ isOpen, onClose, onSave, product, photo }) => {
         setTitle(product.title);
         setDescription(product.description);
         setPrice(product.price);
-        setExistingPhotoPath(product.photo || "");
-
-        if (product.photo) {
-          try {
-            const photoData = await getPhotoFromIndexedDB(product.photo);
-            setPreview(photoData);
-          } catch (error) {
-            console.error("Ошибка загрузки фото:", error);
-          }
+        // Если уже есть image, используем его для предпросмотра
+        if (product.image) {
+          setPreview(product.image);
         }
       } else {
         resetForm();
@@ -34,6 +31,7 @@ const AddProductModal = ({ isOpen, onClose, onSave, product, photo }) => {
 
     if (isOpen) initForm();
   }, [product, isOpen]);
+
 
   const resetForm = () => {
     setTitle("");
