@@ -1,4 +1,118 @@
 /* Оптимизированные стили для модального окна */
+
+
+/* Стили для навигационной панели*/
+
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 60px;
+  background: black;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0;
+  z-index: 103;
+}
+
+.status {
+  font-size: 22px;
+  font-weight: bold;
+  margin-right: 20px;
+}
+
+.logo {
+  color: white;
+  font-size: 22px;
+  margin-left: 15px;
+}
+
+.menu-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: white;
+}
+
+.side-menu {
+  position: fixed;
+  top: 0;
+  left: -250px;
+  width: 250px;
+  height: 100%;
+  background: #333;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  transform: translateX(-100%);
+  transition: transform 0.3s ease-in-out;
+  z-index: 102;
+}
+
+.side-menu.open {
+  transform: translateX(0);
+  left: 0;
+}
+
+.close-button {
+  align-self: flex-end;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: white;
+}
+
+.side-menu ul {
+  list-style: none;
+  padding: 0;
+  margin: 20px 0;
+}
+
+.side-menu li {
+  margin: 15px 0;
+}
+
+.side-menu a {
+  text-decoration: none;
+  font-size: 20px;
+  color: white;
+  display: block;
+  padding: 10px;
+}
+
+.side-menu a:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 101;
+}
+
+.main-page {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.add-order-btn {
+  align-self: center;
+}
+
+.agenda-container {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1; /* Занимает всё оставшееся пространство */
+  overflow: hidden; /* Отключаем прокрутку страницы */
+}
+
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -432,99 +546,4 @@ input[type="file"] {
 }
 .modal-actions button[type="button"]:hover {
   background-color: #c82333;
-}
-
-/* Стили для навигационной панели*/
-
-.navbar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 60px;
-  background: black;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0;
-  z-index: 103;
-}
-
-.status {
-  font-size: 22px;
-  font-weight: bold;
-  margin-right: 20px;
-}
-
-.logo {
-  color: white;
-  font-size: 22px;
-  margin-left: 15px;
-}
-
-.menu-button {
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: white;
-}
-
-.side-menu {
-  position: fixed;
-  top: 0;
-  left: -250px;
-  width: 250px;
-  height: 100%;
-  background: #333;
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  transform: translateX(-100%);
-  transition: transform 0.3s ease-in-out;
-  z-index: 102;
-}
-
-.side-menu.open {
-  transform: translateX(0);
-  left: 0;
-}
-
-.close-button {
-  align-self: flex-end;
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: white;
-}
-
-.side-menu ul {
-  list-style: none;
-  padding: 0;
-  margin: 20px 0;
-}
-
-.side-menu li {
-  margin: 15px 0;
-}
-
-.side-menu a {
-  text-decoration: none;
-  font-size: 20px;
-  color: white;
-  display: block;
-  padding: 10px;
-}
-
-.side-menu a:hover {
-  background: rgba(255, 255, 255, 0.2);
-}
-
-.overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.5);
-  z-index: 101;
 }

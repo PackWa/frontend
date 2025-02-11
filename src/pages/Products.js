@@ -2,8 +2,6 @@ import React, { useState, useEffect } from "react";
 import {fetchProducts, createProduct, updateProduct, deleteProduct, fetchProductPhoto} from "../api/ProductService";
 import {
   getAllProducts,
-  getPhotoFromIndexedDB,
-  savePhotoToIndexedDB,
   blobToBase64,
   addProductDB,
   updateProductDB,
@@ -24,32 +22,52 @@ const Products = () => {
     useEffect(() => {
         const loadProducts = async () => {
             setLoading(true);
-            const offlineProducts = await getAllProducts();
-            if (offlineProducts.length > 0) setProducts(offlineProducts);
 
+            // Загружаем оффлайн продукты
+            const offlineProducts = await getAllProducts();
+            if (offlineProducts.length > 0) {
+                setProducts(offlineProducts);
+            }
+
+            // Если онлайн, получаем свежие данные с сервера
             if (navigator.onLine) {
                 try {
                     const productsData = await fetchProducts(token);
                     const updatedProducts = await Promise.all(
                         productsData.map(async (product) => {
+                            // Если у продукта нет фотографии, возвращаем его без изменений
                             if (!product.photo) return product;
 
-                            try {
-                                let base64Photo = await getPhotoFromIndexedDB(product.photo);
-                                if (!base64Photo) {
+                            // Попытаемся найти оффлайн-версию по id
+                            const offlineProduct = offlineProducts.find(p => p.id === product.id);
+
+                            // Если оффлайн-версия найдена,
+                            // и её photo совпадает с тем, что пришло с сервера,
+                            // и у неё уже есть сохранённое изображение (image),
+                            // то используем локальное image.
+                            if (
+                                offlineProduct &&
+                                offlineProduct.photo === product.photo &&
+                                offlineProduct.image
+                            ) {
+                                return { ...product, image: offlineProduct.image };
+                            } else {
+                                // Иначе — загружаем новую фотографию с сервера
+                                try {
                                     const photoBlob = await fetchProductPhoto(token, product.photo);
-                                    base64Photo = await blobToBase64(photoBlob);
-                                    await savePhotoToIndexedDB(product.photo, base64Photo);
+                                    const base64Photo = await blobToBase64(photoBlob);
+                                    // Обновляем объект продукта, добавляя поле image с новыми данными
+                                    return { ...product, image: base64Photo };
+                                } catch (error) {
+                                    console.error("Ошибка загрузки фото:", error);
+                                    return product;
                                 }
-                                return { ...product, photo: base64Photo };
-                            } catch (error) {
-                                console.error("Ошибка фото:", error);
-                                return product;
                             }
                         })
                     );
 
                     setProducts(updatedProducts);
+                    // Очищаем старые записи и сохраняем обновлённые продукты в IndexedDB
                     await clearProducts();
                     await Promise.all(updatedProducts.map(p => addProductDB(p)));
                 } catch (error) {
@@ -71,7 +89,6 @@ const Products = () => {
                     try {
                         const photoBlob = await fetchProductPhoto(token, createdProduct.photo);
                         const base64Photo = await blobToBase64(photoBlob);
-                        await savePhotoToIndexedDB(createdProduct.photo, base64Photo);
                         createdProduct.photo = base64Photo;
                     } catch (error) {
                         console.error("Ошибка загрузки фото:", error);
@@ -103,13 +120,14 @@ const Products = () => {
                     try {
                         const photoBlob = await fetchProductPhoto(token, updated.photo);
                         const base64Photo = await blobToBase64(photoBlob);
-                        await savePhotoToIndexedDB(updated.photo, base64Photo);
-                        updated.photo = base64Photo;
+                        // Обновляем поле image в объекте продукта
+                        updated.image = base64Photo;
                     } catch (error) {
                         console.error("Ошибка загрузки фото:", error);
                     }
                 } else {
-                    updated.photo = editingProduct.photo; // Оставляем старую фотографию
+                    // Если фотография не изменилась, оставляем локальное значение image
+                    updated.image = editingProduct.image;
                 }
 
                 setProducts(prev =>
@@ -153,7 +171,7 @@ const Products = () => {
                 {/* Проверка, есть ли фотография у продукта */}
                 {product.photo ? (
                     <img
-                        src={product.photo || photo } // Заглушка до загрузки
+                        src={product.image || photo } // Заглушка до загрузки
                         alt={product.title}
                     />
                 ) : (

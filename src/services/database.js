@@ -3,7 +3,6 @@ const DB_NAME = "pwa-db";
 const DB_VERSION = 1;
 const CLIENTS_STORE = "clients";
 const PRODUCTS_STORE = "products";
-const PRODUCTS_PHOTO = "photos";
 const ORDERS_STORE = "orders";
 
 const openDB = () => {
@@ -20,9 +19,6 @@ const openDB = () => {
       }
       if (!db.objectStoreNames.contains(ORDERS_STORE)) {
         db.createObjectStore(ORDERS_STORE, { keyPath: "id" });
-      }
-      if (!db.objectStoreNames.contains(PRODUCTS_PHOTO)) {
-        db.createObjectStore(PRODUCTS_PHOTO, { keyPath: "id" });
       }
     };
 
@@ -93,34 +89,6 @@ export const blobToBase64 = (blob) => {
     reader.readAsDataURL(blob);
   });
 };
-
-export const getPhotoFromIndexedDB = async (productId) => {
-  const db = await openDB();
-  const store = getStore(db, PRODUCTS_PHOTO);
-  return new Promise((resolve, reject) => {
-    const request = store.get(productId);
-    request.onsuccess = () => {
-      if (request.result) {
-        resolve(request.result.data); // <-- Возвращаем только поле data
-      } else {
-        resolve(null);
-      }
-    };
-    request.onerror = () => reject(request.error);
-  });
-};
-
-export const savePhotoToIndexedDB = async (productId, photoBase64) => {
-  const db = await openDB();
-  const store = getStore(db, PRODUCTS_PHOTO, "readwrite");
-  return new Promise((resolve, reject) => {
-    const request = store.put({ id: productId, data: photoBase64 });
-    request.onsuccess = () => resolve();
-    request.onerror = () => reject(request.error);
-  });
-};
-
-
 
   export const addProductDB = async (product) => {
     const db = await openDB();
