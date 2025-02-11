@@ -149,6 +149,10 @@ const Products = () => {
             alert("Нет интернет-соединения. Действие невозможно.");
             return;
         }
+
+        const isConfirmed = window.confirm("Вы уверены, что хотите удалить этот продукт?");
+        if (!isConfirmed) return;
+
         try {
             await deleteProduct(id, token);
             setProducts(prev => prev.filter(p => p.id !== id));
@@ -158,12 +162,12 @@ const Products = () => {
         }
     };
 
+
   if (loading) return <div>Загрузка...</div>;
 
 
   return (
       <div className="products-container">
-        <h2>Продукты</h2>
           <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} text={"🔍 search"} /> {/* Добавляем компонент поиска */}
         <button className="add-product" onClick={() => setAddModalOpen(true)}>
           Добавить продукт

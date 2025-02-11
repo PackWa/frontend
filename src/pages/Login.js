@@ -20,7 +20,8 @@ const Login = () => {
             const response = await loginUser({ email, password });
             console.log(response.message); // Ответ от сервера
             localStorage.setItem("access_token", response.access_token); // Сохраняем токен
-            navigate("/"); // Перенаправляем на главную страницу
+            window.dispatchEvent(new Event("tokenChanged"));
+            navigate("/");
         } catch (error) {
             setErrorMessage(error.message); // Показываем ошибку
         } finally {
@@ -31,7 +32,6 @@ const Login = () => {
     return (
         <div className="register-container">
             <div className="register-card">
-                <h1>Вход</h1>
                 <form onSubmit={handleSubmit} className="register-form">
                     <div className="form-group">
                         <label htmlFor="email">Электронная почта:</label>

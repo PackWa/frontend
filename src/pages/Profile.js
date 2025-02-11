@@ -22,7 +22,6 @@ const Profile = () => {
 
   return (
     <div className="profile-container">
-      <h2>Профиль</h2>
       <div className="profile-info">
         <p><strong>Имя:</strong> {user.name}</p>
         <p><strong>Email:</strong> {user.email}</p>
