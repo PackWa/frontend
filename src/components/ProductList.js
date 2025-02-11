@@ -9,7 +9,7 @@ const ProductList = ({ products, onUpdateQuantity, onRemoveProduct }) => {
           <div className="product-image-container">
           {product.photo ? (
             <img
-              src={URL.createObjectURL(product.photo)}
+              src={product.image}
               alt={product.title}
               style={{ width: "80px", height: "80px", objectFit: "cover", borderRadius: "5px" }}
             />

@@ -3,6 +3,7 @@ import Select from "react-select";
 import ProductList from "./ProductList";
 import { fetchClients } from "../api/ClientService";
 import { fetchProducts } from "../api/ProductService";
+import { getAllProducts } from "../services/database";
 
 const OrderModal = ({ isOpen, onClose, onAddOrder }) => {
   const [orderData, setOrderData] = useState({
@@ -21,7 +22,14 @@ const OrderModal = ({ isOpen, onClose, onAddOrder }) => {
     const fetchData = async () => {
       if (!token) return;
       const clients = await fetchClients(token);
-      const products = await fetchProducts(token);
+      let products = await fetchProducts(token);
+      const localProducts = await getAllProducts();
+
+      products = products.map(product => {
+        const localProduct = localProducts.find(p => p.id === product.id);
+        return localProduct ? { ...product, image: localProduct.image } : product;
+      });
+
       setClients(clients);
       setProducts(products);
     };
@@ -38,29 +46,29 @@ const OrderModal = ({ isOpen, onClose, onAddOrder }) => {
 
   const handleProductSelect = (e) => {
     const productId = parseInt(e.target.value);
-    if (!orderData.products.some((p) => p.id === productId)) {
-      const product = products.find((p) => p.id === productId);
-      setOrderData({
-        ...orderData,
-        products: [...orderData.products, { ...product, quantity: 1 }],
-      });
+    const product = products.find((p) => p.id === productId);
+    if (product && !orderData.products.some((p) => p.id === productId)) {
+      setOrderData((prevData) => ({
+        ...prevData,
+        products: [...prevData.products, { ...product, quantity: 1 }],
+      }));
     }
   };
 
   const updateQuantity = (id, quantity) => {
-    setOrderData({
-      ...orderData,
-      products: orderData.products.map((p) =>
+    setOrderData((prevData) => ({
+      ...prevData,
+      products: prevData.products.map((p) =>
         p.id === id ? { ...p, quantity: Math.max(1, quantity) } : p
       ),
-    });
+    }));
   };
 
   const removeProduct = (id) => {
-    setOrderData({
-      ...orderData,
-      products: orderData.products.filter((p) => p.id !== id),
-    });
+    setOrderData((prevData) => ({
+      ...prevData,
+      products: prevData.products.filter((p) => p.id !== id),
+    }));
   };
 
   const calculateTotal = () => {
@@ -86,7 +94,6 @@ const OrderModal = ({ isOpen, onClose, onAddOrder }) => {
       address: orderData.address,
       total: calculateTotal(),
     };
-    console.log(newOrder.client_id)
     onAddOrder(newOrder);
     setOrderData({ title: "", client: "", products: [], time: "", address: "" });
   };
