@@ -294,29 +294,24 @@
   border-radius: 4px;
 }
 .table-wrapper {
-  max-height: calc(90vh - 230px); /* Высота экрана минус фиксированные отступы */
-  overflow-y: auto;
-  border: 1px solid #ddd;
+  overflow-x: auto;
 }
-
 table {
   width: 100%;
   border-collapse: collapse;
-  table-layout: fixed;
 }
-
 th,
 td {
   border: 1px solid #ddd;
   padding: 8px;
   text-align: left;
-  white-space: normal; /* Убираем запрет на перенос */
-  word-wrap: break-word; /* Переносим длинные слова на новую строку */
+  white-space: nowrap;
 }
 th {
   background-color: #333;
   color: white;
 }
+
 button {
   margin: 5px;
   padding: 5px 10px;
