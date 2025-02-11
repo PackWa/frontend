@@ -9,6 +9,7 @@ import { fetchOrders, createOrder, updateOrder, deleteOrder } from "../api/Order
 import { fetchClients } from "../api/ClientService";
 import { fetchProducts } from "../api/ProductService";
 import { getAllOrders, addOrder, deleteOrderFromDB } from "../services/database";
+import { requestNotificationPermission, scheduleNotification, cancelNotifications } from "../services/notificationService"; // Импортируем функции уведомлений
 
 const localizer = momentLocalizer(moment);
 
@@ -20,44 +21,52 @@ const Agenda = () => {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const token = localStorage.getItem("access_token");
 
+  // Запрос разрешения на уведомления при загрузке компонента
+  useEffect(() => {
+    requestNotificationPermission(); // Используем функцию из notificationService
+  }, []);
+
   useEffect(() => {
     const loadOrders = async () => {
       if (!token) return;
-
+    
       if (isOnline) {
         try {
           const [orders, clients, products] = await Promise.all([fetchOrders(token), fetchClients(token), fetchProducts(token)]);
-
+    
           const clientsMap = clients.reduce((map, client) => {
             map[client.id] = `${client.first_name} ${client.last_name}`;
             return map;
           }, {});
-
+    
           const productsMap = products.reduce((map, product) => {
             map[product.id] = product.title;
             return map;
           }, {});
-
+    
           const processedOrders = orders.map(order => {
             const orderProducts = order.products.map(p => ({
               id: p.product_id,
               title: productsMap[p.product_id] || "Неизвестный продукт",
               quantity: p.quantity || 1,
-              price: p.price_at_order || 0, // Берем цену из API
+              price: p.price_at_order || 0,
             }));
-
+    
             return {
               ...order,
-              start: new Date(order.date),
-              end: new Date(order.date),
+              start: new Date(order.date), // Преобразуем дату в объект Date
+              end: new Date(order.date),  // Преобразуем дату в объект Date
               client_name: clientsMap[order.client_id] || "Не указан",
               products: orderProducts,
               total: orderProducts.reduce((sum, p) => sum + p.price * p.quantity, 0),
             };
           });
-
+    
           setEvents(processedOrders);
-          processedOrders.forEach(addOrder); // Сохраняем заказы в IndexedDB
+          processedOrders.forEach(order => {
+            addOrder(order);
+            scheduleNotification(order);
+          });
         } catch (error) {
           console.error("Ошибка загрузки заказов:", error);
         }
@@ -120,10 +129,13 @@ const Agenda = () => {
           return map;
         }, {});
   
+        // Форматируем дату в ISO 8601 с указанием временной зоны
+        const formattedDate = moment(order.start).format("YYYY-MM-DDTHH:mm:ssZ");
+  
         const formattedOrder = {
           title: order.title,
           address: order.address,
-          date: order.start,
+          date: formattedDate, // Используем отформатированную дату
           client_id: order.client_id !== "Не указан" ? parseInt(order.client_id) || null : null,
           products: order.products.map(p => ({
             product_id: p.id,
@@ -155,6 +167,7 @@ const Agenda = () => {
   
           setEvents([...events, processedOrder]);
           addOrder(processedOrder);
+          scheduleNotification(processedOrder);
         }
       } catch (error) {
         console.error("Ошибка при создании/обновлении заказа:", error);
@@ -163,12 +176,12 @@ const Agenda = () => {
       const tempOrder = { ...order, id: Date.now() }; // Временный ID
       setEvents([...events, tempOrder]);
       addOrder(tempOrder);
+      scheduleNotification(tempOrder);
     }
   
     closeModals();
   };
   
-
   const handleDeleteOrder = async (orderId) => {
     if (!token) return;
 
@@ -177,10 +190,12 @@ const Agenda = () => {
       if (success) {
         setEvents(events.filter(event => event.id !== orderId));
         deleteOrderFromDB(orderId);
+        cancelNotifications(orderId); // Используем функцию из notificationService
       }
     } else {
       setEvents(events.filter(event => event.id !== orderId));
       deleteOrderFromDB(orderId);
+      cancelNotifications(orderId); // Используем функцию из notificationService
     }
 
     closeModals();
@@ -195,7 +210,6 @@ const Agenda = () => {
       </button>
 
       <div className="agenda-container">
-
         <Calendar
           localizer={localizer}
           events={events}
