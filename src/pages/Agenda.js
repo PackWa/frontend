@@ -79,20 +79,6 @@ const Agenda = () => {
     loadOrders();
   }, [token, isOnline]);
 
-  useEffect(() => {
-    const updateOnlineStatus = () => {
-      setIsOnline(navigator.onLine);
-    };
-
-    window.addEventListener("online", updateOnlineStatus);
-    window.addEventListener("offline", updateOnlineStatus);
-
-    return () => {
-      window.removeEventListener("online", updateOnlineStatus);
-      window.removeEventListener("offline", updateOnlineStatus);
-    };
-  }, []);
-
   const openCreateModal = () => {
     setSelectedOrder(null);
     setModalIsOpen(true);
@@ -110,6 +96,11 @@ const Agenda = () => {
   };
 
   const handleAddOrUpdateOrder = async (order) => {
+    if (!navigator.onLine) {
+      alert("Нет интернет-соединения. Действие невозможно.");
+      return;
+    }
+
     if (!token) return;
   
     if (isOnline) {
@@ -183,6 +174,11 @@ const Agenda = () => {
   };
   
   const handleDeleteOrder = async (orderId) => {
+    if (!navigator.onLine) {
+      alert("Нет интернет-соединения. Действие невозможно.");
+      return;
+    }
+    
     if (!token) return;
 
     if (isOnline) {

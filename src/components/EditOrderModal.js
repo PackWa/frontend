@@ -3,7 +3,7 @@ import Select from "react-select";
 import ProductList from "./ProductList";
 import { fetchClients } from "../api/ClientService";
 import { fetchProducts } from "../api/ProductService";
-import { getAllProducts } from "../services/database";
+import { getAllProducts, getAllClients } from "../services/database";
 
 const EditOrderModal = ({ isOpen, onClose, onUpdateOrder, order, onDeleteOrder }) => {
   const [orderData, setOrderData] = useState({
@@ -16,26 +16,61 @@ const EditOrderModal = ({ isOpen, onClose, onUpdateOrder, order, onDeleteOrder }
 
   const [clients, setClients] = useState([]);
   const [products, setProducts] = useState([]);
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
   const token = localStorage.getItem("access_token");
 
+  // Загрузка клиентов и продуктов
   useEffect(() => {
     const fetchData = async () => {
       if (!token) return;
-      const clients = await fetchClients(token);
-      let products = await fetchProducts(token);
-      const localProducts = await getAllProducts();
 
-      products = products.map(product => {
-        const localProduct = localProducts.find(p => p.id === product.id);
-        return localProduct ? { ...product, image: localProduct.image } : product;
-      });
-
-      setClients(clients);
-      setProducts(products);
+      if (isOnline) {
+        // Если интернет есть, загружаем данные с сервера
+        const clients = await fetchClients(token);
+        let products = await fetchProducts(token);
+        setClients(clients);
+        setProducts(products);
+      } else {
+        // Если интернета нет, загружаем данные из IndexedDB
+        const localProducts = await getAllProducts();
+        const localClients = await getAllClients();
+        setClients(localClients);
+        setProducts(localProducts);
+      }
     };
-    fetchData();
-  }, [token]);
 
+    fetchData();
+  }, [token, isOnline]);
+
+  // Загрузка фотографий продуктов из IndexedDB при открытии модального окна
+  useEffect(() => {
+    const loadProductImages = async () => {
+      if (order && order.products.length > 0) {
+        const localProducts = await getAllProducts();
+
+        const updatedProducts = await Promise.all(
+          order.products.map(async (p) => {
+            const foundProduct = localProducts.find(prod => prod.id === p.id);
+            return {
+              ...p,
+              image: foundProduct?.image || "", // Используем плейсхолдер, если фото нет
+            };
+          })
+        );
+
+        setOrderData(prevData => ({
+          ...prevData,
+          products: updatedProducts,
+        }));
+      }
+    };
+
+    if (isOpen) {
+      loadProductImages();
+    }
+  }, [order, isOpen]);
+
+  // Обновление данных заказа при изменении order, clients или products
   useEffect(() => {
     if (order && products.length > 0) {
       const updatedProducts = order.products.map(p => {
@@ -43,7 +78,6 @@ const EditOrderModal = ({ isOpen, onClose, onUpdateOrder, order, onDeleteOrder }
         return {
           ...p,
           title: foundProduct?.title || "Неизвестный продукт",
-          image: foundProduct?.image || "", // Используем фото из IndexedDB
         };
       });
 
@@ -62,13 +96,22 @@ const EditOrderModal = ({ isOpen, onClose, onUpdateOrder, order, onDeleteOrder }
     onDeleteOrder(order.id);
   };
 
-  const handleProductSelect = (e) => {
+  const handleProductSelect = async (e) => {
     const productId = parseInt(e.target.value);
     if (!orderData.products.some((p) => p.id === productId)) {
       const product = products.find((p) => p.id === productId);
+      const localProducts = await getAllProducts();
+      const foundProduct = localProducts.find(prod => prod.id === productId);
+
+      const newProduct = {
+        ...product,
+        quantity: 1,
+        image: foundProduct?.image || "", // Используем плейсхолдер, если фото нет
+      };
+
       setOrderData({
         ...orderData,
-        products: [...orderData.products, { ...product, quantity: 1 }],
+        products: [...orderData.products, newProduct],
       });
     }
   };
