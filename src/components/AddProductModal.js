@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { getPhotoFromIndexedDB } from "../services/database";
 
-const AddProductModal = ({ isOpen, onClose, onSave, product }) => {
+const AddProductModal = ({ isOpen, onClose, onSave, product, photo }) => {
   const [id, setId] = useState("");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -58,12 +58,21 @@ const AddProductModal = ({ isOpen, onClose, onSave, product }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
 
+    if (!(title || price)) {
+        alert("Нельзя создать продукт без названия и цены")
+    }
     const formData = new FormData();
-    formData.append("title", title);
-    formData.append("description", description);
-    formData.append("price", price);
+    if (product?.title !== title) {
+      formData.append("title", title);
+    }
+    if (product?.description !== description) {
+      formData.append("description", description);
+    }
+    if (product?.price !== price) {
+      formData.append("price", price);
+    }
 
-    if (selectedFile && existingPhotoPath) {
+    if (selectedFile) {
       formData.append("photo", selectedFile);
     }
 

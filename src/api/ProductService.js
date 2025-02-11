@@ -73,7 +73,6 @@ export const updateProduct = async (productId, updatedData, token) => {
     const response = await axios.put(`${API_URL}${productId}`, updatedData, {
       headers: {
         Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
       },
     });
     return response.data;
