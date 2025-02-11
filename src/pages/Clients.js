@@ -42,6 +42,9 @@ const Clients = () => {
   const handleDelete = async (id) => {
     if (!token) return;
 
+    const isConfirmed = window.confirm("Вы уверены, что хотите удалить этого клиента?");
+    if (!isConfirmed) return; // Если пользователь отменил, ничего не делаем
+
     if (isOnline) {
       const success = await deleteClient(id, token);
       if (success) {
@@ -112,8 +115,8 @@ const Clients = () => {
                 <td>{client.last_name}</td>
                 <td>{client.phone}</td>
                 <td>
-                  <button onClick={() => handleEdit(client)}>Редактировать</button>
-                  <button onClick={() => handleDelete(client.id)}>Удалить</button>
+                  <button onClick={() => handleEdit(client)}>edit</button>
+                  <button style={{color: "red"}} onClick={() => handleDelete(client.id)}>delete</button>
                 </td>
               </tr>
             ))}

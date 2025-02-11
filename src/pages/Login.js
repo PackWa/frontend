@@ -20,7 +20,8 @@ const Login = () => {
             const response = await loginUser({ email, password });
             console.log(response.message); // Ответ от сервера
             localStorage.setItem("access_token", response.access_token); // Сохраняем токен
-            navigate("/"); // Перенаправляем на главную страницу
+            window.dispatchEvent(new Event("tokenChanged"));
+            navigate("/");
         } catch (error) {
             setErrorMessage(error.message); // Показываем ошибку
         } finally {

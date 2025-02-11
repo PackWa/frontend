@@ -149,6 +149,10 @@ const Products = () => {
             alert("Нет интернет-соединения. Действие невозможно.");
             return;
         }
+
+        const isConfirmed = window.confirm("Вы уверены, что хотите удалить этот продукт?");
+        if (!isConfirmed) return;
+
         try {
             await deleteProduct(id, token);
             setProducts(prev => prev.filter(p => p.id !== id));
@@ -157,6 +161,7 @@ const Products = () => {
             console.error("Ошибка удаления:", error);
         }
     };
+
 
   if (loading) return <div>Загрузка...</div>;
 

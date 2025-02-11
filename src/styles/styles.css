@@ -96,6 +96,29 @@
   z-index: 101;
 }
 
+.logout-button {
+  background: red;
+  color: white !important;
+  font-size: 18px;
+  font-weight: bold;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.3s ease-in-out, transform 0.1s;
+  width: 100%;
+  text-align: left;
+}
+
+.logout-button:hover {
+  background: darkred;
+  transform: scale(1.05);
+}
+
+.logout-button:active {
+  transform: scale(0.95);
+}
+
 .main-page {
   display: flex;
   flex-direction: column;
@@ -271,18 +294,24 @@
   border-radius: 4px;
 }
 .table-wrapper {
-  overflow-x: auto;
+  max-height: calc(90vh - 230px); /* Высота экрана минус фиксированные отступы */
+  overflow-y: auto;
+  border: 1px solid #ddd;
 }
+
 table {
   width: 100%;
   border-collapse: collapse;
+  table-layout: fixed;
 }
+
 th,
 td {
   border: 1px solid #ddd;
   padding: 8px;
   text-align: left;
-  white-space: nowrap;
+  white-space: normal; /* Убираем запрет на перенос */
+  word-wrap: break-word; /* Переносим длинные слова на новую строку */
 }
 th {
   background-color: #333;
@@ -346,7 +375,7 @@ button {
   border-radius: 4px;
 }
 
-/* Стили для продуктов*/
+/* Контейнер для всех продуктов */
 .products-container {
   padding: 80px 20px 20px;
   max-width: 1200px;
@@ -364,42 +393,155 @@ button {
 }
 .products-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 20px;
   justify-content: center;
 }
+
+/* Карточка продукта */
 .product-card {
+  width: 300px;
+  height: 450px;
   background: #fff;
-  padding: 15px;
   border-radius: 10px;
-  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-  text-align: center;
-  max-width: 300px; /* Ограничиваем ширину карточки */
-  margin: 0 auto; /* Центрируем карточку */
-}
-.product-card img {
-  width: 100%;
-  height: 200px; /* Фиксированная высота для изображения */
-  object-fit: cover; /* Сохраняем пропорции изображения */
-  border-radius: 10px;
-}
-.placeholder-image {
-  width: 100%;
-  height: 200px;
-  background-color: #e0e0e0;
+  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
   display: flex;
-  justify-content: center;
-  align-items: center;
-  color: #666;
-  border-radius: 10px;
+  flex-direction: column;
+  transition: transform 0.3s, box-shadow 0.3s;
+  margin: 0 auto;
 }
-.product-card h3 {
-  margin: 10px 0;
+.product-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 15px rgba(0,0,0,0.2);
+}
+
+/* Контейнер изображения с фиксированным (квадратным) соотношением сторон */
+.product-card .image-container {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  overflow: hidden;
+}
+.product-card .image-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Контент карточки */
+.product-card .content {
+  flex: 1;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  text-align: left;
+}
+.product-card .content h3 {
+  margin: 0 0 10px;
   font-size: 18px;
 }
-.product-card p {
+.product-card .content p {
   margin: 5px 0;
   font-size: 14px;
+}
+.product-card .content p.price {
+  font-weight: bold;
+  margin-top: 5px;
+}
+
+/* Кнопки действий */
+.product-card .actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+.product-card .actions button {
+  flex: 1;
+  padding: 8px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.3s;
+}
+.product-card .actions button:first-child {
+  background-color: #007bff;
+  color: #fff;
+}
+.product-card .actions button:first-child:hover {
+  background-color: #0069d9;
+}
+.product-card .actions button:last-child {
+  background-color: #dc3545;
+  color: #fff;
+}
+.product-card .actions button:last-child:hover {
+  background-color: #c82333;
+}
+
+.product-skeleton-card {
+  background: #fff;
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  width: 300px;
+  height: 450px;
+  display: flex;
+  flex-direction: column;
+  margin: 0 auto;
+}
+
+/* Изображение-скелетон – квадрат */
+.product-skeleton-image {
+  width: 100%;
+  height: 0;
+  padding-bottom: 100%; /* для квадратного соотношения */
+  background: #f0f0f0;
+  border-radius: 4px;
+  margin-bottom: 12px;
+  position: relative;
+}
+
+.product-skeleton-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+}
+
+/* Скелетоны для текста и цены */
+.product-skeleton-title {
+  height: 20px;
+  width: 60%;
+  background: #f0f0f0;
+  border-radius: 4px;
+}
+.product-skeleton-text {
+  height: 16px;
+  width: 80%;
+  background: #f0f0f0;
+  border-radius: 4px;
+}
+.product-skeleton-price {
+  height: 24px;
+  width: 40%;
+  background: #f0f0f0;
+  border-radius: 4px;
+}
+
+/* Скелетоны для кнопок действий */
+.product-skeleton-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+}
+.product-skeleton-button {
+  height: 32px;
+  width: 80px;
+  background: #f0f0f0;
+  border-radius: 4px;
 }
 
 .modal-overlay {
@@ -546,56 +688,6 @@ input[type="file"] {
 }
 .modal-actions button[type="button"]:hover {
   background-color: #c82333;
-}
-
-.skeleton-card {
-  background: #fff;
-  border-radius: 8px;
-  padding: 16px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.skeleton-image {
-  height: 200px;
-  background: #f0f0f0;
-  border-radius: 4px;
-  margin-bottom: 12px;
-}
-
-.skeleton-title {
-  height: 20px;
-  width: 60%;
-  background: #f0f0f0;
-  margin-bottom: 8px;
-  border-radius: 4px;
-}
-
-.skeleton-text {
-  height: 16px;
-  width: 80%;
-  background: #f0f0f0;
-  margin-bottom: 8px;
-  border-radius: 4px;
-}
-
-.skeleton-price {
-  height: 24px;
-  width: 40%;
-  background: #f0f0f0;
-  border-radius: 4px;
-}
-
-.skeleton-actions {
-  display: flex;
-  gap: 8px;
-  margin-top: 16px;
-}
-
-.skeleton-button {
-  height: 32px;
-  width: 80px;
-  background: #f0f0f0;
-  border-radius: 4px;
 }
 
 @keyframes pulse {

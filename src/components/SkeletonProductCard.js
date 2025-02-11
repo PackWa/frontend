@@ -1,20 +1,20 @@
 import React from 'react';
 
-const SkeletonProductCard = () => {
+const ProductSkeletonCard = () => {
     return (
-        <div className="skeleton-card">
-            <div className="skeleton-image animate-pulse"></div>
-            <div className="skeleton-content">
-                <div className="skeleton-title animate-pulse"></div>
-                <div className="skeleton-text animate-pulse"></div>
-                <div className="skeleton-price animate-pulse"></div>
-                <div className="skeleton-actions">
-                    <div className="skeleton-button animate-pulse"></div>
-                    <div className="skeleton-button animate-pulse"></div>
+        <div className="product-skeleton-card">
+            <div className="product-skeleton-image animate-pulse"></div>
+            <div className="product-skeleton-content">
+                <div className="product-skeleton-title animate-pulse"></div>
+                <div className="product-skeleton-text animate-pulse"></div>
+                <div className="product-skeleton-price animate-pulse"></div>
+                <div className="product-skeleton-actions">
+                    <div className="product-skeleton-button animate-pulse"></div>
+                    <div className="product-skeleton-button animate-pulse"></div>
                 </div>
             </div>
         </div>
     );
 };
 
-export default SkeletonProductCard;
+export default ProductSkeletonCard;

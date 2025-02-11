@@ -68,19 +68,17 @@ const ProductCard = ({ product, onEdit, onDelete }) => {
     return (
         <div className="product-card">
             <div className={`image-container ${isLoading ? 'loading' : 'loaded'}`}>
-                <img
-                    src={imageSrc}
-                    alt={product.title}
-                    loading="lazy"
-                />
+                <img src={imageSrc} alt={product.title} loading="lazy" />
                 {isLoading && <div className="image-loading"></div>}
             </div>
-            <h3>{product.title}</h3>
-            <p>{product.description}</p>
-            <p>{product.price} ₽</p>
-            <div className="actions">
-                <button onClick={onEdit}>Редактировать</button>
-                <button onClick={() => onDelete(product.id)}>Удалить</button>
+            <div className="content">
+                <h3>{product.title}</h3>
+                <p>{product.description}</p>
+                <p className="price">{product.price} ₽</p>
+                <div className="actions">
+                    <button onClick={onEdit}>Редактировать</button>
+                    <button onClick={() => onDelete(product.id)}>Удалить</button>
+                </div>
             </div>
         </div>
     );

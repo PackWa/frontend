@@ -1,29 +1,34 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import {Link, useNavigate} from "react-router-dom";
 import { FiMenu, FiX } from "react-icons/fi";
 
 const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(() => !!localStorage.getItem("access_token"));
   const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const navigate = useNavigate(); // Используем useNavigate
 
   useEffect(() => {
-    const token = localStorage.getItem("access_token");
-    if (token) {
-      setIsLoggedIn(true);
-    }
+    const updateAuthStatus = () => {
+      const token = localStorage.getItem("access_token");
+      setIsLoggedIn(!!token);
+    };
+
+    window.addEventListener("tokenChanged", updateAuthStatus);
 
     const updateOnlineStatus = () => {
       setIsOnline(navigator.onLine);
-    };
+    }
 
     window.addEventListener("online", updateOnlineStatus);
     window.addEventListener("offline", updateOnlineStatus);
     
     return () => {
-      window.removeEventListener("online", updateOnlineStatus);
-      window.removeEventListener("offline", updateOnlineStatus);
+      window.removeEventListener("tokenChanged", updateAuthStatus);
+      window.removeEventListener("online", () => setIsOnline(true));
+      window.removeEventListener("offline", () => setIsOnline(false));
     };
+
   }, []);
 
   const toggleMenu = () => {
@@ -32,6 +37,7 @@ const Navbar = () => {
 
   const handleLogout = () => {
     localStorage.removeItem("access_token");
+    navigate("/login");
     setIsLoggedIn(false);
   };
 
