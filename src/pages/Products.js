@@ -10,8 +10,12 @@ import {
 } from "../services/database";
 import AddProductModal from "../components/AddProductModal";
 import photo from "../assets/camera_placeholder.jpg";
+import ProductCard from "../components/ProductCard";
+import SkeletonProductCard from "../components/SkeletonProductCard";
+import SearchBar from "../components/SearchBar";
 
 const Products = () => {
+  const [searchQuery, setSearchQuery] = useState('');
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [addModalOpen, setAddModalOpen] = useState(false);
@@ -19,65 +23,69 @@ const Products = () => {
   const [editingProduct, setEditingProduct] = useState(null);
   const token = localStorage.getItem("access_token");
 
+    const filteredProducts = products.filter(product =>
+        product.title.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
     useEffect(() => {
+        let isMounted = true;
+
         const loadProducts = async () => {
-            setLoading(true);
+            try {
+                setLoading(true);
 
-            // Загружаем оффлайн продукты
-            const offlineProducts = await getAllProducts();
-            if (offlineProducts.length > 0) {
-                setProducts(offlineProducts);
-            }
-
-            // Если онлайн, получаем свежие данные с сервера
-            if (navigator.onLine) {
-                try {
-                    const productsData = await fetchProducts(token);
-                    const updatedProducts = await Promise.all(
-                        productsData.map(async (product) => {
-                            // Если у продукта нет фотографии, возвращаем его без изменений
-                            if (!product.photo) return product;
-
-                            // Попытаемся найти оффлайн-версию по id
-                            const offlineProduct = offlineProducts.find(p => p.id === product.id);
-
-                            // Если оффлайн-версия найдена,
-                            // и её photo совпадает с тем, что пришло с сервера,
-                            // и у неё уже есть сохранённое изображение (image),
-                            // то используем локальное image.
-                            if (
-                                offlineProduct &&
-                                offlineProduct.photo === product.photo &&
-                                offlineProduct.image
-                            ) {
-                                return { ...product, image: offlineProduct.image };
-                            } else {
-                                // Иначе — загружаем новую фотографию с сервера
-                                try {
-                                    const photoBlob = await fetchProductPhoto(token, product.photo);
-                                    const base64Photo = await blobToBase64(photoBlob);
-                                    // Обновляем объект продукта, добавляя поле image с новыми данными
-                                    return { ...product, image: base64Photo };
-                                } catch (error) {
-                                    console.error("Ошибка загрузки фото:", error);
-                                    return product;
-                                }
-                            }
-                        })
-                    );
-
-                    setProducts(updatedProducts);
-                    // Очищаем старые записи и сохраняем обновлённые продукты в IndexedDB
-                    await clearProducts();
-                    await Promise.all(updatedProducts.map(p => addProductDB(p)));
-                } catch (error) {
-                    console.error("Ошибка загрузки:", error);
+                // Шаг 1: Загружаем кэшированные данные
+                const offlineProducts = await getAllProducts();
+                if (isMounted && offlineProducts.length > 0) {
+                    setProducts(offlineProducts);
                 }
+
+                // Шаг 2: Если онлайн - загружаем свежие данные
+                if (navigator.onLine) {
+                    try {
+                        const serverProducts = await fetchProducts(token);
+
+                        // Обработка фотографий
+                        const processedProducts = await Promise.all(
+                            serverProducts.map(async (product) => {
+                                // Проверяем есть ли фото в кэше
+                                const cachedProduct = offlineProducts.find(p => p.id === product.id);
+
+                                if (cachedProduct?.photo === product.photo && cachedProduct.image) {
+                                    return { ...product, image: cachedProduct.image };
+                                }
+
+                                if (product.photo) {
+                                    try {
+                                        const photoBlob = await fetchProductPhoto(token, product.photo);
+                                        const base64 = await blobToBase64(photoBlob);
+                                        return { ...product, image: base64 };
+                                    } catch (error) {
+                                        console.error("Error loading photo:", error);
+                                        return product;
+                                    }
+                                }
+                                return product;
+                            })
+                        );
+
+                        // Шаг 3: Обновляем состояние и кэш
+                        if (isMounted) {
+                            setProducts(processedProducts);
+                            await clearProducts();
+                            await Promise.all(processedProducts.map(p => addProductDB(p)));
+                        }
+                    } catch (error) {
+                        console.error("Ошибка загрузки продуктов:", error);
+                    }
+                }
+            } finally {
+                if (isMounted) setLoading(false);
             }
-            setLoading(false);
         };
 
         loadProducts();
+        return () => { isMounted = false };
     }, [token]);
 
     const handleAddProduct = async (formData) => {
@@ -89,7 +97,7 @@ const Products = () => {
                     try {
                         const photoBlob = await fetchProductPhoto(token, createdProduct.photo);
                         const base64Photo = await blobToBase64(photoBlob);
-                        createdProduct.photo = base64Photo;
+                        createdProduct.image = base64Photo;
                     } catch (error) {
                         console.error("Ошибка загрузки фото:", error);
                     }
@@ -100,11 +108,6 @@ const Products = () => {
         } catch (error) {
             console.error("Ошибка создания продукта:", error);
         }
-    };
-
-    const handleEditProduct = (product) => {
-        setEditingProduct(product);
-        setEditModalOpen(true);
     };
 
     const handleUpdateProduct = async (updatedProduct) => {
@@ -161,33 +164,31 @@ const Products = () => {
   return (
       <div className="products-container">
         <h2>Продукты</h2>
+          <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} text={"🔍 search"} /> {/* Добавляем компонент поиска */}
         <button className="add-product" onClick={() => setAddModalOpen(true)}>
           Добавить продукт
         </button>
 
-        <div className="products-grid">
-          {products.map((product) => (
-              <div key={product.id} className="product-card">
-                {/* Проверка, есть ли фотография у продукта */}
-                {product.photo ? (
-                    <img
-                        src={product.image || photo } // Заглушка до загрузки
-                        alt={product.title}
-                    />
-                ) : (
-                    <img
-                        src={`${photo}`} // Заглушка до загрузки
-                        alt={"Нет фотографии"}
-                    />
-                )}
-                <h3>{product.title}</h3>
-                <p>{product.description}</p>
-                <p>{product.price} ₽</p>
-                <button onClick={() => handleEditProduct(product)}>Редактировать</button>
-                <button onClick={() => handleDeleteProduct(product.id)}>Удалить</button>
-              </div>
-          ))}
-        </div>
+          <div className="products-grid">
+              {loading ? (
+                  // Показываем 6 скелетонов во время загрузки
+                  Array.from({ length: 6 }).map((_, i) => (
+                      <SkeletonProductCard key={`skeleton-${i}`} />
+                  ))
+              ) : (
+                  filteredProducts.map(product => (
+                      <ProductCard
+                          key={product.id}
+                          product={product}
+                          onEdit={() => {
+                              setEditingProduct(product);
+                              setEditModalOpen(true);
+                          }}
+                          onDelete={handleDeleteProduct}
+                      />
+                  ))
+              )}
+          </div>
 
         <AddProductModal
             isOpen={addModalOpen}

@@ -547,3 +547,91 @@ input[type="file"] {
 .modal-actions button[type="button"]:hover {
   background-color: #c82333;
 }
+
+.skeleton-card {
+  background: #fff;
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.skeleton-image {
+  height: 200px;
+  background: #f0f0f0;
+  border-radius: 4px;
+  margin-bottom: 12px;
+}
+
+.skeleton-title {
+  height: 20px;
+  width: 60%;
+  background: #f0f0f0;
+  margin-bottom: 8px;
+  border-radius: 4px;
+}
+
+.skeleton-text {
+  height: 16px;
+  width: 80%;
+  background: #f0f0f0;
+  margin-bottom: 8px;
+  border-radius: 4px;
+}
+
+.skeleton-price {
+  height: 24px;
+  width: 40%;
+  background: #f0f0f0;
+  border-radius: 4px;
+}
+
+.skeleton-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.skeleton-button {
+  height: 32px;
+  width: 80px;
+  background: #f0f0f0;
+  border-radius: 4px;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.animate-pulse {
+  animation: pulse 2s infinite;
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.search-bar {
+  margin: 20px 0;
+  padding: 0 15px;
+}
+
+.search-bar input {
+  width: 100%;
+  max-width: 400px;
+  padding: 10px 15px;
+  border: 1px solid #ddd;
+  border-radius: 25px;
+  font-size: 16px;
+  outline: none;
+  transition: border-color 0.3s;
+}
+
+.search-bar input:focus {
+  border-color: #3498db;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
