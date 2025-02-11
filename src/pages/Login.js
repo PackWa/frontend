@@ -32,7 +32,6 @@ const Login = () => {
     return (
         <div className="register-container">
             <div className="register-card">
-                <h1>Вход</h1>
                 <form onSubmit={handleSubmit} className="register-form">
                     <div className="form-group">
                         <label htmlFor="email">Электронная почта:</label>

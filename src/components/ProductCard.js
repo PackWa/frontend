@@ -72,9 +72,9 @@ const ProductCard = ({ product, onEdit, onDelete }) => {
                 {isLoading && <div className="image-loading"></div>}
             </div>
             <div className="content">
-                <h3>{product.title}</h3>
-                <p>{product.description}</p>
-                <p className="price">{product.price} ₽</p>
+                <h3>title: {product.title}</h3>
+                <p>description: {product.description}</p>
+                <p className="price">price: {product.price} ₽</p>
                 <div className="actions">
                     <button onClick={onEdit}>Редактировать</button>
                     <button onClick={() => onDelete(product.id)}>Удалить</button>

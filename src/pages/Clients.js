@@ -91,7 +91,6 @@ const Clients = () => {
 
   return (
     <div className="clients-container">
-      <h2>Клиенты</h2>
       <div className="controls">
         <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} text={"🔍 search"} /> {/* Добавляем компонент поиска */}
         <button className="add-button" onClick={() => setAddModalOpen(true)}>

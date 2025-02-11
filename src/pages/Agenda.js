@@ -199,8 +199,6 @@ const Agenda = () => {
 
   return (
     <div className="main-page">
-      <h2>Расписание заказов</h2>
-
       <button className="add-order-btn" onClick={openCreateModal}>
         Добавить заказ
       </button>

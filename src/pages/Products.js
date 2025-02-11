@@ -168,7 +168,6 @@ const Products = () => {
 
   return (
       <div className="products-container">
-        <h2>Продукты</h2>
           <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} text={"🔍 search"} /> {/* Добавляем компонент поиска */}
         <button className="add-product" onClick={() => setAddModalOpen(true)}>
           Добавить продукт

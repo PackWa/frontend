@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {Link, useNavigate} from "react-router-dom";
+import {Link, useLocation, useNavigate} from "react-router-dom";
 import { FiMenu, FiX } from "react-icons/fi";
 
 const Navbar = () => {
@@ -7,6 +7,7 @@ const Navbar = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(() => !!localStorage.getItem("access_token"));
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const navigate = useNavigate(); // Используем useNavigate
+  const location = useLocation(); // Получаем текущий путь
 
   useEffect(() => {
     const updateAuthStatus = () => {
@@ -41,13 +42,32 @@ const Navbar = () => {
     setIsLoggedIn(false);
   };
 
+  const getPageTitle = () => {
+    switch (location.pathname) {
+      case '/':
+        return 'Главная';
+      case '/clients':
+        return 'Клиенты';
+      case '/products':
+        return 'Продукты';
+      case '/profile':
+        return 'Профиль';
+      case '/login':
+        return 'Вход';
+      case '/register':
+        return 'Регистрация';
+      default:
+        return 'Менеджер';
+    }
+  };
+
   return (
     <>
       <header className="navbar">
         <button className="menu-button" onClick={toggleMenu}>
           <FiMenu size={30} />
         </button>
-        <h1 className="logo">Менеджер</h1>
+        <h1 className="logo">{getPageTitle()}</h1>
         <div className="status" style={{ color: isOnline ? "#4CAF50" : "#F44336" }}>
           {isOnline ? "Онлайн" : "Оффлайн"}
         </div>

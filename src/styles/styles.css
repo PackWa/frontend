@@ -120,6 +120,7 @@
 }
 
 .main-page {
+  margin-top: 80px;
   display: flex;
   flex-direction: column;
   height: 100vh;
@@ -373,8 +374,8 @@ button {
 /* Контейнер для всех продуктов */
 .products-container {
   padding: 80px 20px 20px;
-  max-width: 1200px;
-  margin: 0 auto;
+  margin-right: 20px;
+  margin-left: 20px;
   text-align: center;
 }
 .add-product {
@@ -388,6 +389,7 @@ button {
 }
 .products-grid {
   display: grid;
+  max-width: 100%;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 20px;
   justify-content: center;
