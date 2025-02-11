@@ -2,9 +2,11 @@ import React, { useState, useEffect } from "react";
 import { fetchClients, createClient, updateClient, deleteClient } from "../api/ClientService";
 import AddClientModal from "../components/AddClientModal";
 import { getAllClients, addClient, deleteClientFromDB } from "../services/database";
+import SearchBar from "../components/SearchBar";
 
 const Clients = () => {
   const [clients, setClients] = useState([]);
+  const [searchQuery, setSearchQuery] = useState(''); // Стейт для поиска
   const [editingClient, setEditingClient] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [addModalOpen, setAddModalOpen] = useState(false);
@@ -92,11 +94,17 @@ const Clients = () => {
     }
   };
 
+  const filteredClients = clients.filter((client) =>
+      (client.first_name + " " + client.last_name + " " + client.phone)
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase())
+  );
+
   return (
     <div className="clients-container">
       <h2>Клиенты</h2>
       <div className="controls">
-        <input type="text" placeholder="🔍 Поиск клиентов..." className="search-input" />
+        <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} text={"🔍 search"} /> {/* Добавляем компонент поиска */}
         <button className="add-button" onClick={() => setAddModalOpen(true)}>
           Добавить клиента
         </button>
@@ -112,7 +120,7 @@ const Clients = () => {
             </tr>
           </thead>
           <tbody>
-            {clients.map((client) => (
+          {filteredClients.map((client) => ( // Используем отфильтрованный список клиентов
               <tr key={client.id}>
                 <td>{client.first_name}</td>
                 <td>{client.last_name}</td>

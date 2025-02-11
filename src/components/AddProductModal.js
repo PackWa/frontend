@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { getPhotoFromIndexedDB } from "../services/database";
 
 import photo from "../assets/camera_placeholder.jpg";
 
@@ -45,6 +44,8 @@ const AddProductModal = ({ isOpen, onClose, onSave, product}) => {
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      console.log(file);
+      console.log(file.type)
       setSelectedFile(file);
       const reader = new FileReader();
       reader.onloadend = () => setPreview(reader.result);

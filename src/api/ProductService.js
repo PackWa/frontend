@@ -36,11 +36,11 @@ export const fetchProductPhoto = async (token, filename) => {
   const photoBlob = await response.blob();
 
   if (photoBlob instanceof Blob) {
-    if (photoBlob.type.startsWith('image/jpeg')) {
-      console.log("Получено изображение JPG");
+    if (photoBlob.type.startsWith('image/')) {  // Проверяем, является ли файл изображением
+      console.log(`Получено изображение: ${photoBlob.type}`);
       return photoBlob;
     } else {
-      console.error("Получено не изображение JPG, тип:", photoBlob.type);
+      console.error("Получен файл неподдерживаемого типа:", photoBlob.type);
       return null;
     }
   } else {
@@ -48,6 +48,7 @@ export const fetchProductPhoto = async (token, filename) => {
     return null;
   }
 };
+
 
 
 
