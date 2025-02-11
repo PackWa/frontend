@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import "../styles/styles.css";
 
 const Profile = () => {
   const [user, setUser] = useState({
@@ -53,54 +54,6 @@ const Profile = () => {
           </div>
         </div>
       )}
-
-      <style jsx="true">{`
-        .profile-container {
-          padding: 80px 20px 20px; /* Отступ от NavBar */
-          max-width: 600px;
-          margin: 0 auto;
-          text-align: center;
-        }
-        .profile-info {
-          background: #f8f8f8;
-          padding: 20px;
-          border-radius: 10px;
-        }
-        .edit-button {
-          margin-top: 10px;
-          padding: 8px 12px;
-          cursor: pointer;
-          background-color: #007bff;
-          color: white;
-          border: none;
-          border-radius: 4px;
-        }
-        .modal {
-          position: fixed;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          background: rgba(0, 0, 0, 0.5);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-        .modal-content {
-          background: white;
-          padding: 20px;
-          border-radius: 5px;
-          text-align: center;
-        }
-        input {
-          display: block;
-          width: 100%;
-          margin: 8px 0;
-          padding: 8px;
-          border: 1px solid #ccc;
-          border-radius: 4px;
-        }
-      `}</style>
     </div>
   );
 };

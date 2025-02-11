@@ -7,6 +7,7 @@ import EditOrderModal from "../components/EditOrderModal";
 import CustomEvent from "../components/CustomEvent";
 import { fetchOrders, createOrder, updateOrder, deleteOrder } from "../api/OrderService";
 import { fetchClients } from "../api/ClientService";
+import { fetchProducts } from "../api/ProductService";
 import { getAllOrders, addOrder, deleteOrderFromDB } from "../services/database";
 
 const localizer = momentLocalizer(moment);
@@ -25,19 +26,35 @@ const Agenda = () => {
 
       if (isOnline) {
         try {
-          const [orders, clients] = await Promise.all([fetchOrders(token), fetchClients(token)]);
+          const [orders, clients, products] = await Promise.all([fetchOrders(token), fetchClients(token), fetchProducts(token)]);
 
           const clientsMap = clients.reduce((map, client) => {
             map[client.id] = `${client.first_name} ${client.last_name}`;
             return map;
           }, {});
 
-          const processedOrders = orders.map(order => ({
-            ...order,
-            start: new Date(order.date),
-            end: new Date(order.date),
-            client_name: clientsMap[order.client_id] || "Не указан",
-          }));
+          const productsMap = products.reduce((map, product) => {
+            map[product.id] = product.title;
+            return map;
+          }, {});
+
+          const processedOrders = orders.map(order => {
+            const orderProducts = order.products.map(p => ({
+              id: p.product_id,
+              title: productsMap[p.product_id] || "Неизвестный продукт",
+              quantity: p.quantity || 1,
+              price: p.price_at_order || 0, // Берем цену из API
+            }));
+
+            return {
+              ...order,
+              start: new Date(order.date),
+              end: new Date(order.date),
+              client_name: clientsMap[order.client_id] || "Не указан",
+              products: orderProducts,
+              total: orderProducts.reduce((sum, p) => sum + p.price * p.quantity, 0),
+            };
+          });
 
           setEvents(processedOrders);
           processedOrders.forEach(addOrder); // Сохраняем заказы в IndexedDB
@@ -85,48 +102,72 @@ const Agenda = () => {
 
   const handleAddOrUpdateOrder = async (order) => {
     if (!token) return;
-    const formattedOrder = {
-      title: order.title,
-      address: order.address,
-      date: order.start,
-      client_id: order.client_id !== "Не указан" ? parseInt(order.client_id) || null : null,
-      products: order.products.map(product => ({
-        product_id: product.id,
-        quantity: product.quantity || 1,
-      }))
-    };
-
-    if (order.id) {
-      if (isOnline) {
-        const updatedOrder = await updateOrder(order.id, formattedOrder, token);
-        if (updatedOrder) {
-          setEvents(events.map(evt => (evt.id === order.id ? {
-            ...updatedOrder,
-            start: new Date(updatedOrder.date),
-            end: new Date(updatedOrder.date),
-          } : evt)));
-          addOrder(updatedOrder);
+  
+    if (isOnline) {
+      try {
+        const [updatedProducts, updatedClients] = await Promise.all([
+          fetchProducts(token),
+          fetchClients(token),
+        ]);
+  
+        const productsMap = updatedProducts.reduce((map, product) => {
+          map[product.id] = { title: product.title, price: product.price };
+          return map;
+        }, {});
+  
+        const clientsMap = updatedClients.reduce((map, client) => {
+          map[client.id] = `${client.first_name} ${client.last_name}`;
+          return map;
+        }, {});
+  
+        const formattedOrder = {
+          title: order.title,
+          address: order.address,
+          date: order.start,
+          client_id: order.client_id !== "Не указан" ? parseInt(order.client_id) || null : null,
+          products: order.products.map(p => ({
+            product_id: p.id,
+            quantity: p.quantity || 1,
+          })),
+        };
+  
+        let newOrder;
+        if (order.id) {
+          newOrder = await updateOrder(order.id, formattedOrder, token);
+        } else {
+          newOrder = await createOrder(formattedOrder, token);
         }
-      } else {
-        addOrder({ ...formattedOrder, id: order.id });
+  
+        if (newOrder) {
+          const processedOrder = {
+            ...newOrder,
+            start: new Date(newOrder.date),
+            end: new Date(newOrder.date),
+            client_name: clientsMap[newOrder.client_id] || "Не указан",
+            products: newOrder.products.map(p => ({
+              id: p.product_id,
+              title: productsMap[p.product_id]?.title || "Неизвестный продукт",
+              quantity: p.quantity || 1,
+              price: p.price_at_order || 0,
+            })),
+            total: newOrder.products.reduce((sum, p) => sum + (p.price_at_order || 0) * (p.quantity || 1), 0),
+          };
+  
+          setEvents([...events, processedOrder]);
+          addOrder(processedOrder);
+        }
+      } catch (error) {
+        console.error("Ошибка при создании/обновлении заказа:", error);
       }
     } else {
-      if (isOnline) {
-        const createdOrder = await createOrder(formattedOrder, token);
-        if (createdOrder) {
-          setEvents([...events, {
-            ...createdOrder,
-            start: new Date(createdOrder.date),
-            end: new Date(createdOrder.date),
-          }]);
-          addOrder(createdOrder);
-        }
-      } else {
-        addOrder({ ...formattedOrder, id: Date.now() }); // Временный ID
-      }
+      const tempOrder = { ...order, id: Date.now() }; // Временный ID
+      setEvents([...events, tempOrder]);
+      addOrder(tempOrder);
     }
+  
     closeModals();
   };
+  
 
   const handleDeleteOrder = async (orderId) => {
     if (!token) return;
