@@ -54,13 +54,7 @@ export const fetchProductPhoto = async (token, filename) => {
 // Создание нового продукта
 export const createProduct = async (productData, token) => {
   try {
-    const formData = new FormData();
-    formData.append("title", productData.name);
-    formData.append("description", productData.description);
-    formData.append("price", productData.price);
-    formData.append("photo", productData.image);
-
-    const response = await axios.post(API_URL, formData, {
+    const response = await axios.post(API_URL, productData, {
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "multipart/form-data",

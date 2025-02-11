@@ -63,7 +63,8 @@ const Products = () => {
   }, [token]);
 
   const handleAddProduct = async (formData) => {
-    console.log("FORM DATA CREATE PRODUCT")
+
+  console.log("FORM DATA CREATE PRODUCT")
     console.log(formData)
      try {
         const createdProduct = await createProduct(formData, token);
@@ -100,7 +101,7 @@ const Products = () => {
         }
 
         try {
-            const updated = await updateProduct(updatedProduct.id, updatedProduct, token);
+            const updated = await updateProduct(editingProduct.id, updatedProduct, token);
             if (updated) {
                 // Process photo if changed
                 if (updated.photo && updated.photo !== editingProduct.photo) {
@@ -108,10 +109,12 @@ const Products = () => {
                         const photoBlob = await fetchProductPhoto(token, updated.photo);
                         const base64Photo = await blobToBase64(photoBlob);
                         await savePhotoToIndexedDB(updated.photo, base64Photo);
-                        updated.imageUrl = base64Photo;
+                        updated.photo = base64Photo;
                     } catch (error) {
                         console.error("Ошибка загрузки фото:", error);
                     }
+                } else if (updated.photo && updated.photo === editingProduct.photo) {
+
                 }
 
                 setProducts(prev =>
@@ -159,7 +162,10 @@ const Products = () => {
                         alt={product.title}
                     />
                 ) : (
-                    <div className="placeholder-image">Нет изображения</div> // Если нет фото, показываем заглушку
+                    <img
+                        src={`${photo}`} // Заглушка до загрузки
+                        alt={"Нет фотографии"}
+                    />
                 )}
                 <h3>{product.title}</h3>
                 <p>{product.description}</p>

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { getPhotoFromIndexedDB } from "../services/database";
 
 const AddProductModal = ({ isOpen, onClose, onSave, product }) => {
+  const [id, setId] = useState("");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
@@ -12,6 +13,7 @@ const AddProductModal = ({ isOpen, onClose, onSave, product }) => {
   useEffect(() => {
     const initForm = async () => {
       if (product) {
+        setId(product.id);
         setTitle(product.title);
         setDescription(product.description);
         setPrice(product.price);
@@ -63,8 +65,6 @@ const AddProductModal = ({ isOpen, onClose, onSave, product }) => {
 
     if (selectedFile) {
       formData.append("photo", selectedFile);
-    } else if (existingPhotoPath) {
-      formData.append("photoPath", existingPhotoPath);
     }
 
     if (product) formData.append("id", product.id);
