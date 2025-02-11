@@ -63,7 +63,7 @@ const AddProductModal = ({ isOpen, onClose, onSave, product }) => {
     formData.append("description", description);
     formData.append("price", price);
 
-    if (selectedFile) {
+    if (selectedFile && existingPhotoPath) {
       formData.append("photo", selectedFile);
     }
 

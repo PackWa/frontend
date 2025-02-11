@@ -21,72 +21,68 @@ const Products = () => {
   const [editingProduct, setEditingProduct] = useState(null);
   const token = localStorage.getItem("access_token");
 
-  useEffect(() => {
-    const loadProducts = async () => {
-      setLoading(true);
-      const offlineProducts = await getAllProducts();
-      if (offlineProducts.length > 0) setProducts(offlineProducts);
+    useEffect(() => {
+        const loadProducts = async () => {
+            setLoading(true);
+            const offlineProducts = await getAllProducts();
+            if (offlineProducts.length > 0) setProducts(offlineProducts);
 
-      if (navigator.onLine) {
-        try {
-          const productsData = await fetchProducts(token);
-          const updatedProducts = await Promise.all(
-              productsData.map(async (product) => {
-                if (!product.photo) return product;
-
+            if (navigator.onLine) {
                 try {
-                  const photoFromDB = await getPhotoFromIndexedDB(product.photo);
-                  if (photoFromDB) return { ...product, imageUrl: photoFromDB };
+                    const productsData = await fetchProducts(token);
+                    const updatedProducts = await Promise.all(
+                        productsData.map(async (product) => {
+                            if (!product.photo) return product;
 
-                  const photoBlob = await fetchProductPhoto(token, product.photo);
-                  const base64Photo = await blobToBase64(photoBlob);
-                  await savePhotoToIndexedDB(product.photo, base64Photo);
-                  return { ...product, imageUrl: base64Photo };
+                            try {
+                                let base64Photo = await getPhotoFromIndexedDB(product.photo);
+                                if (!base64Photo) {
+                                    const photoBlob = await fetchProductPhoto(token, product.photo);
+                                    base64Photo = await blobToBase64(photoBlob);
+                                    await savePhotoToIndexedDB(product.photo, base64Photo);
+                                }
+                                return { ...product, photo: base64Photo };
+                            } catch (error) {
+                                console.error("Ошибка фото:", error);
+                                return product;
+                            }
+                        })
+                    );
+
+                    setProducts(updatedProducts);
+                    await clearProducts();
+                    await Promise.all(updatedProducts.map(p => addProductDB(p)));
                 } catch (error) {
-                  console.error("Ошибка фото:", error);
-                  return product;
+                    console.error("Ошибка загрузки:", error);
                 }
-              })
-          );
-
-          setProducts(updatedProducts);
-          await clearProducts();
-          await Promise.all(updatedProducts.map(p => addProductDB(p)));
-        } catch (error) {
-          console.error("Ошибка загрузки:", error);
-        }
-      }
-      setLoading(false);
-    };
-
-    loadProducts();
-  }, [token]);
-
-  const handleAddProduct = async (formData) => {
-
-  console.log("FORM DATA CREATE PRODUCT")
-    console.log(formData)
-     try {
-        const createdProduct = await createProduct(formData, token);
-        if (createdProduct) {
-          // Process photo
-          if (createdProduct.photo) {
-            try {
-              const photoBlob = await fetchProductPhoto(token, createdProduct.photo);
-              const base64Photo = await blobToBase64(photoBlob);
-              await savePhotoToIndexedDB(createdProduct.photo, base64Photo);
-              createdProduct.imageUrl = base64Photo;
-            } catch (error) {
-              console.error("Ошибка загрузки фото:", error);
             }
-          }
+            setLoading(false);
+        };
 
-          setProducts(prev => [...prev, createdProduct]);
-          await addProductDB(createdProduct);
+        loadProducts();
+    }, [token]);
+
+    const handleAddProduct = async (formData) => {
+        console.log("FORM DATA CREATE PRODUCT", formData);
+        try {
+            const createdProduct = await createProduct(formData, token);
+            if (createdProduct) {
+                if (createdProduct.photo) {
+                    try {
+                        const photoBlob = await fetchProductPhoto(token, createdProduct.photo);
+                        const base64Photo = await blobToBase64(photoBlob);
+                        await savePhotoToIndexedDB(createdProduct.photo, base64Photo);
+                        createdProduct.photo = base64Photo;
+                    } catch (error) {
+                        console.error("Ошибка загрузки фото:", error);
+                    }
+                }
+                setProducts(prev => [...prev, createdProduct]);
+                await addProductDB(createdProduct);
+            }
+        } catch (error) {
+            console.error("Ошибка создания продукта:", error);
         }
-      } catch (error) {
-        console.error("Ошибка создания продукта:", error);
-      }
     };
 
     const handleEditProduct = (product) => {
@@ -103,7 +99,6 @@ const Products = () => {
         try {
             const updated = await updateProduct(editingProduct.id, updatedProduct, token);
             if (updated) {
-                // Process photo if changed
                 if (updated.photo && updated.photo !== editingProduct.photo) {
                     try {
                         const photoBlob = await fetchProductPhoto(token, updated.photo);
@@ -113,14 +108,14 @@ const Products = () => {
                     } catch (error) {
                         console.error("Ошибка загрузки фото:", error);
                     }
-                } else if (updated.photo && updated.photo === editingProduct.photo) {
-
+                } else {
+                    updated.photo = editingProduct.photo; // Оставляем старую фотографию
                 }
 
                 setProducts(prev =>
                     prev.map(p => p.id === updated.id ? updated : p)
                 );
-                await (updated);
+                await updateProductDB(updated);
             }
             setEditModalOpen(false);
         } catch (error) {
@@ -128,19 +123,19 @@ const Products = () => {
         }
     };
 
-  const handleDeleteProduct = async (id) => {
-      if (!navigator.onLine) {
-          alert("Нет интернет-соединения. Действие невозможно.");
-          return;
-      }
-    try {
-      await deleteProduct(id, token);
-      setProducts(prev => prev.filter(p => p.id !== id));
-      await deleteProductDB(id);
-    } catch (error) {
-      console.error("Ошибка удаления:", error);
-    }
-  };
+    const handleDeleteProduct = async (id) => {
+        if (!navigator.onLine) {
+            alert("Нет интернет-соединения. Действие невозможно.");
+            return;
+        }
+        try {
+            await deleteProduct(id, token);
+            setProducts(prev => prev.filter(p => p.id !== id));
+            await deleteProductDB(id);
+        } catch (error) {
+            console.error("Ошибка удаления:", error);
+        }
+    };
 
   if (loading) return <div>Загрузка...</div>;
 
@@ -158,7 +153,7 @@ const Products = () => {
                 {/* Проверка, есть ли фотография у продукта */}
                 {product.photo ? (
                     <img
-                        src={product.imageUrl || `${photo}` } // Заглушка до загрузки
+                        src={product.photo || photo } // Заглушка до загрузки
                         alt={product.title}
                     />
                 ) : (
