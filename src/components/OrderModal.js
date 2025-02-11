@@ -123,7 +123,7 @@ const OrderModal = ({ isOpen, onClose, onAddOrder }) => {
             <option value="">Выберите продукт...</option>
             {products.map((product) => (
               <option key={product.id} value={product.id}>
-                {product.name} — {product.price} ₽
+                {product.title} — {product.price} ₽
               </option>
             ))}
           </select>

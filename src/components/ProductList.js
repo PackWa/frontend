@@ -1,4 +1,5 @@
 import React from "react";
+import placeholderImage from "../assets/camera_placeholder.jpg";
 
 const ProductList = ({ products, onUpdateQuantity, onRemoveProduct }) => {
   return (
@@ -6,15 +7,23 @@ const ProductList = ({ products, onUpdateQuantity, onRemoveProduct }) => {
       {products.map((product) => (
         <div key={product.id} className="product-item">
           <div className="product-image-container">
+          {product.photo ? (
             <img
-              src={URL.createObjectURL(product.image)} // Используем URL.createObjectURL
-              alt={product.name}
-              className="product-img"
+              src={URL.createObjectURL(product.photo)}
+              alt={product.title}
+              style={{ width: "80px", height: "80px", objectFit: "cover", borderRadius: "5px" }}
             />
+          ) : (
+            <img
+              src={placeholderImage}
+              alt="Фото отсутствует"
+              style={{ width: "80px", height: "80px", objectFit: "cover", borderRadius: "5px" }}
+            />
+          )}
           </div>
           <div>
             <span>
-              {product.name} — {product.price} ₽
+              {product.title} — {product.price} ₽
             </span>
             <input
               type="number"

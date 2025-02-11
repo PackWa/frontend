@@ -12,7 +12,7 @@ const CustomEvent = ({ event }) => {
       <ul>
         {event.products.map((product) => (
           <li key={product.id}>
-            {product.name} — {product.quantity || 1} шт.
+            {product.title} — {product.quantity || 1} шт.
           </li>
         ))}
       </ul>

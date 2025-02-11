@@ -105,7 +105,6 @@ const Clients = () => {
         <table>
           <thead>
             <tr>
-              <th>ID</th>
               <th>Имя</th>
               <th>Фамилия</th>
               <th>Телефон</th>
@@ -115,7 +114,6 @@ const Clients = () => {
           <tbody>
             {clients.map((client) => (
               <tr key={client.id}>
-                <td>{client.id}</td>
                 <td>{client.first_name}</td>
                 <td>{client.last_name}</td>
                 <td>{client.phone}</td>
@@ -155,88 +153,6 @@ const Clients = () => {
       )}
 
       <AddClientModal isOpen={addModalOpen} onClose={() => setAddModalOpen(false)} onSave={handleAddClient} />
-
-      <style jsx="true">{`
-        .clients-container {
-          padding: 80px 20px 20px; /* Отступ сверху под NavBar */
-          max-width: 1000px;
-          margin: 0 auto;
-        }
-        .controls {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 15px;
-        }
-        .search-input {
-          padding: 8px;
-          width: 60%;
-          max-width: 300px;
-          border: 1px solid #ccc;
-          border-radius: 4px;
-        }
-        .add-button {
-          padding: 8px 12px;
-          cursor: pointer;
-          background-color: #28a745;
-          color: white;
-          border: none;
-          border-radius: 4px;
-        }
-        .table-wrapper {
-          overflow-x: auto;
-        }
-        table {
-          width: 100%;
-          border-collapse: collapse;
-        }
-        th,
-        td {
-          border: 1px solid #ddd;
-          padding: 8px;
-          text-align: left;
-          white-space: nowrap;
-        }
-        th {
-          background-color: #333;
-          color: white;
-        }
-        button {
-          margin: 5px;
-          padding: 5px 10px;
-          cursor: pointer;
-        }
-        .modal {
-          position: fixed;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          background: rgba(0, 0, 0, 0.5);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-        .modal-content {
-          background: white;
-          padding: 20px;
-          border-radius: 5px;
-          text-align: center;
-        }
-
-        @media (max-width: 600px) {
-          .controls {
-            flex-direction: column;
-            gap: 10px;
-          }
-          .search-input {
-            width: 100%;
-          }
-          table {
-            font-size: 14px;
-          }
-        }
-      `}</style>
     </div>
   );
 };

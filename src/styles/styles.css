@@ -1,131 +1,530 @@
 /* Оптимизированные стили для модального окна */
 .modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-  }
-  
-  .modal-content {
-    background: white;
-    padding: 20px;
-    border-radius: 12px;
-    width: 350px;
-    max-width: 90%;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-    text-align: center;
-  }
-  
-  .modal-content h2 {
-    margin-bottom: 15px;
-  }
-  
-  .modal-content form {
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .modal-content input,
-  .modal-content select {
-    padding: 10px;
-    margin: 5px 0;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    width: 100%;
-    max-width: 95%;
-  }
-  
-  .modal-content .selected-products {
-    margin: 10px 0;
-    max-height: 200px; /* Фиксированная высота блока */
-    overflow-y: auto; /* Прокрутка по вертикали */
-    border: 1px solid #ccc; /* Опционально: добавим границу */
-    border-radius: 8px; /* Скругление углов */
-    padding: 10px; /* Отступы внутри блока */
-  }
-  
-  
-  .modal-content .product-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: #f1f1f1;
-    padding: 10px;
-    border-radius: 8px;
-    margin: 5px 0;
-    gap: 10px; /* Добавляем отступ между элементами */
-  }
-  
-  .modal-content .product-img {
-    width: 100px;
-    height: 100px;
-    border-radius: 8px;
-    object-fit: cover;
-  }
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
 
-  .modal-content .product-item div {
-    flex: 1; /* Растягиваем блок с названием и количеством */
+.modal-content {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  width: 350px;
+  max-width: 90%;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  text-align: center;
+}
+
+.modal-content h2 {
+  margin-bottom: 15px;
+}
+
+.modal-content form {
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-content input,
+.modal-content select {
+  padding: 10px;
+  margin: 5px 0;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  width: 100%;
+  max-width: 95%;
+}
+
+.modal-content .selected-products {
+  margin: 10px 0;
+  max-height: 200px;
+  overflow-y: auto;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 10px;
+}
+
+.modal-content .product-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #f1f1f1;
+  padding: 10px;
+  border-radius: 8px;
+  margin: 5px 0;
+  gap: 10px;
+}
+
+.modal-content .product-img {
+  width: 50px;
+  height: 50px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.modal-content .product-item div {
+  flex: 1;
+}
+
+.modal-content .product-item input {
+  width: 60px;
+}
+
+.modal-content button {
+  margin-top: 10px;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.modal-content button[type="submit"] {
+  background: #007bff;
+  color: white;
+}
+
+.modal-content button[type="button"] {
+  background: #ccc;
+}
+
+.total-price {
+  font-weight: bold;
+  margin: 10px 0;
+}
+
+.custom-event {
+  padding: 5px;
+  background: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.custom-event strong {
+  display: block;
+  margin-bottom: 5px;
+}
+
+.custom-event ul {
+  margin: 5px 0;
+  padding-left: 20px;
+}
+
+.custom-event ul li {
+  list-style-type: disc;
+}
+
+.image-preview {
+  margin: 10px 0;
+}
+
+.image-preview img {
+  max-width: 100%;
+  border-radius: 8px;
+}
+
+/* Стили для страницы клиентов */
+.clients-container {
+  padding: 80px 20px 20px; /* Отступ сверху под NavBar */
+  max-width: 1000px;
+  margin: 0 auto;
+}
+.controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+.search-input {
+  padding: 8px;
+  width: 60%;
+  max-width: 300px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+.add-button {
+  padding: 8px 12px;
+  cursor: pointer;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 4px;
+}
+.table-wrapper {
+  overflow-x: auto;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+th,
+td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+  white-space: nowrap;
+}
+th {
+  background-color: #333;
+  color: white;
+}
+button {
+  margin: 5px;
+  padding: 5px 10px;
+  cursor: pointer;
+}
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.modal-content {
+  background: white;
+  padding: 20px;
+  border-radius: 5px;
+  text-align: center;
+}
+
+@media (max-width: 600px) {
+  .controls {
+    flex-direction: column;
+    gap: 10px;
   }
-  
-  .modal-content .product-item input {
-    width: 60px; /* Фиксированная ширина для input */
+  .search-input {
+    width: 100%;
   }
-  
-  .modal-content button {
-    margin-top: 10px;
-    padding: 10px;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-  }
-  
-  .modal-content button[type="submit"] {
-    background: #007bff;
-    color: white;
-  }
-  
-  .modal-content button[type="button"] {
-    background: #ccc;
-  }
-  
-  .total-price {
-    font-weight: bold;
-    margin: 10px 0;
-  }
-  
-  .custom-event {
-    padding: 5px;
-    background: #f9f9f9;
-    border: 1px solid #ddd;
-    border-radius: 4px;
+  table {
     font-size: 14px;
   }
-  
-  .custom-event strong {
-    display: block;
-    margin-bottom: 5px;
-  }
-  
-  .custom-event ul {
-    margin: 5px 0;
-    padding-left: 20px;
-  }
-  
-  .custom-event ul li {
-    list-style-type: disc;
-  }
-  
-  .image-preview {
-    margin: 10px 0;
-  }
-  
-  .image-preview img {
-    max-width: 100%;
-    border-radius: 8px;
-  }
+}
+
+/* Стили для профиля */
+.profile-container {
+  padding: 80px 20px 20px;
+  max-width: 600px;
+  margin: 0 auto;
+  text-align: center;
+}
+.profile-info {
+  background: #f8f8f8;
+  padding: 20px;
+  border-radius: 10px;
+}
+.edit-button {
+  margin-top: 10px;
+  padding: 8px 12px;
+  cursor: pointer;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+}
+
+/* Стили для продуктов*/
+.products-container {
+  padding: 80px 20px 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  text-align: center;
+}
+.add-product {
+  padding: 10px 15px;
+  background: #28a745;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-bottom: 20px;
+}
+.products-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+  justify-content: center;
+}
+.product-card {
+  background: #fff;
+  padding: 15px;
+  border-radius: 10px;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  max-width: 300px; /* Ограничиваем ширину карточки */
+  margin: 0 auto; /* Центрируем карточку */
+}
+.product-card img {
+  width: 100%;
+  height: 200px; /* Фиксированная высота для изображения */
+  object-fit: cover; /* Сохраняем пропорции изображения */
+  border-radius: 10px;
+}
+.placeholder-image {
+  width: 100%;
+  height: 200px;
+  background-color: #e0e0e0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #666;
+  border-radius: 10px;
+}
+.product-card h3 {
+  margin: 10px 0;
+  font-size: 18px;
+}
+.product-card p {
+  margin: 5px 0;
+  font-size: 14px;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 500px;
+  position: relative;
+}
+
+.image-preview {
+  max-width: 200px;
+  max-height: 200px;
+  margin: 10px 0;
+  border-radius: 4px;
+}
+
+.file-label {
+  display: inline-block;
+  padding: 8px 12px;
+  background: #f0f0f0;
+  border-radius: 4px;
+  cursor: pointer;
+  margin: 10px 0;
+}
+
+input[type="file"] {
+  display: none;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+/* Стили для добавления продукта*/
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+.modal-content {
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+.modal-header h2 {
+  margin: 0 0 20px;
+  text-align: center;
+}
+.image-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 20px;
+}
+.image-preview {
+  width: 100%;
+  max-width: 300px;
+  border-radius: 4px;
+  object-fit: cover;
+  margin-bottom: 10px;
+}
+.file-label {
+  padding: 8px 16px;
+  background-color: #007bff;
+  color: #fff;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+.file-label:hover {
+  background-color: #0056b3;
+}
+input[type="file"] {
+  display: none;
+}
+.form-group {
+  margin-bottom: 15px;
+  text-align: left;
+}
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+.modal-actions button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+.modal-actions button[type="submit"] {
+  background-color: #28a745;
+  color: #fff;
+}
+.modal-actions button[type="submit"]:hover {
+  background-color: #218838;
+}
+.modal-actions button[type="button"] {
+  background-color: #dc3545;
+  color: #fff;
+}
+.modal-actions button[type="button"]:hover {
+  background-color: #c82333;
+}
+
+/* Стили для навигационной панели*/
+
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 60px;
+  background: black;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0;
+  z-index: 103;
+}
+
+.status {
+  font-size: 22px;
+  font-weight: bold;
+  margin-right: 20px;
+}
+
+.logo {
+  color: white;
+  font-size: 22px;
+  margin-left: 15px;
+}
+
+.menu-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: white;
+}
+
+.side-menu {
+  position: fixed;
+  top: 0;
+  left: -250px;
+  width: 250px;
+  height: 100%;
+  background: #333;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  transform: translateX(-100%);
+  transition: transform 0.3s ease-in-out;
+  z-index: 102;
+}
+
+.side-menu.open {
+  transform: translateX(0);
+  left: 0;
+}
+
+.close-button {
+  align-self: flex-end;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: white;
+}
+
+.side-menu ul {
+  list-style: none;
+  padding: 0;
+  margin: 20px 0;
+}
+
+.side-menu li {
+  margin: 15px 0;
+}
+
+.side-menu a {
+  text-decoration: none;
+  font-size: 20px;
+  color: white;
+  display: block;
+  padding: 10px;
+}
+
+.side-menu a:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 101;
+}
