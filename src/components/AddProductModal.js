@@ -2,26 +2,21 @@ import React, { useState, useEffect } from "react";
 
 import photo from "../assets/camera_placeholder.jpg";
 
-const AddProductModal = ({ isOpen, onClose, onSave, product}) => {
-  const [id, setId] = useState("");
+const AddProductModal = ({ isOpen, onClose, onSave, product }) => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
-  const [image, setImage] = useState("");
   const [selectedFile, setSelectedFile] = useState(null);
-  const [preview, setPreview] = useState("");
-  const [existingPhotoPath, setExistingPhotoPath] = useState("");
+  const [image, setImage] = useState("");
 
   useEffect(() => {
     const initForm = async () => {
       if (product) {
-        setId(product.id);
         setTitle(product.title);
         setDescription(product.description);
         setPrice(product.price);
-        // Если уже есть image, используем его для предпросмотра
         if (product.image) {
-          setPreview(product.image);
+          setImage(product.image);
         }
       } else {
         resetForm();
@@ -31,26 +26,21 @@ const AddProductModal = ({ isOpen, onClose, onSave, product}) => {
     if (isOpen) initForm();
   }, [product, isOpen]);
 
-
   const resetForm = () => {
     setTitle("");
     setDescription("");
     setPrice("");
     setSelectedFile(null);
-    setPreview("");
-    setExistingPhotoPath("");
+    setImage("");
   };
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      console.log(file);
-      console.log(file.type)
       setSelectedFile(file);
       const reader = new FileReader();
-      reader.onloadend = () => setPreview(reader.result);
+      reader.onloadend = () => setImage(reader.result);
       reader.readAsDataURL(file);
-      setExistingPhotoPath("");
     }
   };
 
@@ -58,8 +48,9 @@ const AddProductModal = ({ isOpen, onClose, onSave, product}) => {
     e.preventDefault();
 
     if (!(title || price)) {
-        alert("Нельзя создать продукт без названия и цены")
+      alert("Product must have a title and price");
     }
+
     const formData = new FormData();
     if (product?.title !== title) {
       formData.append("title", title);
@@ -81,21 +72,20 @@ const AddProductModal = ({ isOpen, onClose, onSave, product}) => {
     onClose();
   };
 
-
   if (!isOpen) return null;
 
   return (
       <div className="modal-overlay">
         <div className="modal-content">
           <div className="modal-header">
-            <h2>{product ? "Редактировать" : "Добавить"} продукт</h2>
+            <h2>{product ? "Edit" : "Add"} Product</h2>
           </div>
 
           <div className="image-section">
-            {preview && (
+            {image && (
                 <img
-                    src={preview}
-                    alt="Превью"
+                    src={image}
+                    alt="Preview"
                     className="image-preview"
                 />
             )}
@@ -106,13 +96,13 @@ const AddProductModal = ({ isOpen, onClose, onSave, product}) => {
                 id="fileInput"
             />
             <label htmlFor="fileInput" className="file-label">
-              {preview ? "Изменить фото" : "Выбрать фото"}
+              {image ? "Change Photo" : "Choose Photo"}
             </label>
           </div>
 
           <form onSubmit={handleSubmit}>
             <div className="form-group">
-              <label>Название:</label>
+              <label>Title:</label>
               <input
                   type="text"
                   value={title}
@@ -122,7 +112,7 @@ const AddProductModal = ({ isOpen, onClose, onSave, product}) => {
             </div>
 
             <div className="form-group">
-              <label>Описание:</label>
+              <label>Description:</label>
               <textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
@@ -131,7 +121,7 @@ const AddProductModal = ({ isOpen, onClose, onSave, product}) => {
             </div>
 
             <div className="form-group">
-              <label>Цена:</label>
+              <label>Price:</label>
               <input
                   type="number"
                   value={price}
@@ -141,8 +131,8 @@ const AddProductModal = ({ isOpen, onClose, onSave, product}) => {
             </div>
 
             <div className="modal-actions">
-              <button type="button" onClick={onClose}>Отмена</button>
-              <button type="submit">Сохранить</button>
+              <button type="button" onClick={onClose}>Cancel</button>
+              <button type="submit">Save</button>
             </div>
           </form>
         </div>

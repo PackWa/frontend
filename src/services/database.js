@@ -1,9 +1,9 @@
-// db.js
 const DB_NAME = "pwa-db";
 const DB_VERSION = 1;
 const CLIENTS_STORE = "clients";
 const PRODUCTS_STORE = "products";
 const ORDERS_STORE = "orders";
+const USER_STORE = "users";
 
 const openDB = () => {
   return new Promise((resolve, reject) => {
@@ -20,6 +20,9 @@ const openDB = () => {
       if (!db.objectStoreNames.contains(ORDERS_STORE)) {
         db.createObjectStore(ORDERS_STORE, { keyPath: "id" });
       }
+      if (!db.objectStoreNames.contains(USER_STORE)) {
+        db.createObjectStore(USER_STORE, { keyPath: "id" });
+      }
     };
 
     request.onsuccess = () => resolve(request.result);
@@ -30,6 +33,27 @@ const openDB = () => {
 const getStore = (db, storeName, mode = "readonly") => {
   return db.transaction(storeName, mode).objectStore(storeName);
 };
+
+export const addUserDB = async (user) => {
+  const db = await openDB();
+  const store = getStore(db, "users", "readwrite");
+  return new Promise((resolve, reject) => {
+    const request = store.put(user);
+    request.onsuccess = () => resolve();
+    request.onerror = () => reject(request.error);
+  });
+};
+
+export const getUserFromDB = async () => {
+  const db = await openDB();
+  const store = getStore(db, "users", "readonly");
+  return new Promise((resolve, reject) => {
+    const request = store.getAll();
+    request.onsuccess = () => resolve(request.result[0]);
+    request.onerror = () => reject(request.error);
+  });
+};
+
 
 export const getAllClients = async () => {
   const db = await openDB();
@@ -149,5 +173,3 @@ export const blobToBase64 = (blob) => {
       request.onerror = () => reject(request.error);
     });
   };
-
-// Аналогичные функции для продуктов...

@@ -1,40 +1,39 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import '../App.css';
-import { loginUser } from '../api/authorizationService';
+import "../App.css";
+import { loginUser } from "../api/authorizationService";
 
 const Login = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-    const [error_message, setErrorMessage] = useState("");
+    const [errorMessage, setErrorMessage] = useState("");
     const [isLoading, setIsLoading] = useState(false);
-    const navigate = useNavigate(); // Используем useNavigate
+    const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
         setIsLoading(true);
-        setErrorMessage(""); // Сбрасываем ошибку перед отправкой
+        setErrorMessage("");
 
         try {
             const response = await loginUser({ email, password });
-            console.log(response.message); // Ответ от сервера
-            localStorage.setItem("access_token", response.access_token); // Сохраняем токен
+            localStorage.setItem("access_token", response.access_token);
             window.dispatchEvent(new Event("tokenChanged"));
             navigate("/");
         } catch (error) {
-            setErrorMessage(error.message); // Показываем ошибку
+            setErrorMessage(error.message);
         } finally {
-            setIsLoading(false); // Останавливаем индикатор загрузки
+            setIsLoading(false);
         }
     };
 
     return (
-        <div className="register-container">
-            <div className="register-card">
-                <form onSubmit={handleSubmit} className="register-form">
+        <div className="login-container">
+            <div className="login-card">
+                <form onSubmit={handleSubmit} className="login-form">
                     <div className="form-group">
-                        <label htmlFor="email">Электронная почта:</label>
+                        <label htmlFor="email">Email:</label>
                         <input
                             type="email"
                             id="email"
@@ -45,7 +44,7 @@ const Login = () => {
                     </div>
 
                     <div className="form-group">
-                        <label htmlFor="password">Пароль:</label>
+                        <label htmlFor="password">Password:</label>
                         <input
                             type="password"
                             id="password"
@@ -55,15 +54,15 @@ const Login = () => {
                         />
                     </div>
 
-                    {error_message && <p className="error-message">{error_message}</p>}
+                    {errorMessage && <p className="error-message">{errorMessage}</p>}
 
                     <button type="submit" className="submit-button" disabled={isLoading}>
-                        {isLoading ? "Загрузка..." : "Войти"}
+                        {isLoading ? "Loading..." : "Login"}
                     </button>
                 </form>
 
-                <p className="login-link">
-                    Нет аккаунта? <Link to="/register">Зарегистрироваться</Link>
+                <p className="register-link">
+                    Don't have an account? <Link to="/register">Sign up</Link>
                 </p>
             </div>
         </div>

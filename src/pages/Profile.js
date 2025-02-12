@@ -1,59 +1,60 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { getUserData} from "../api/userService";  // импортируем API запросы
 import "../styles/styles.css";
+import {addUserDB, getUserFromDB} from "../services/database";
 
 const Profile = () => {
   const [user, setUser] = useState({
-    name: "Иван Иванов",
-    email: "ivan@example.com",
-    phone: "+123456789",
+    first_name: "",
+    last_name: "",
+    email: "",
+    phone: "",
   });
 
-  const [editing, setEditing] = useState(false);
-  const [editedUser, setEditedUser] = useState({ ...user });
+  const loadUserData = async () => {
+    try {
+      if (navigator.onLine) {
+        const data = await getUserData(localStorage.getItem("access_token"));
+        setUser({
+          first_name: data.first_name,
+          last_name: data.last_name,
+          email: data.email,
+          phone: data.phone,
+        });
 
-  const handleEdit = () => {
-    setEditing(true);
+        await addUserDB({
+          id: data.id,
+          first_name: data.first_name,
+          last_name: data.last_name,
+          email: data.email,
+          phone: data.phone,
+        });
+      } else {
+        const userFromDB = await getUserFromDB();
+        if (userFromDB) {
+          setUser(userFromDB);
+        } else {
+          console.error("No user data found in IndexedDB.");
+        }
+      }
+    } catch (error) {
+      console.error("Error loading user data:", error);
+    }
   };
 
-  const handleSave = () => {
-    setUser(editedUser);
-    setEditing(false);
-  };
+  useEffect(() => {
+    loadUserData();
+  }, []);
 
   return (
-    <div className="profile-container">
-      <div className="profile-info">
-        <p><strong>Имя:</strong> {user.name}</p>
-        <p><strong>Email:</strong> {user.email}</p>
-        <p><strong>Телефон:</strong> {user.phone}</p>
-        <button className="edit-button" onClick={handleEdit}>Редактировать</button>
-      </div>
-
-      {editing && (
-        <div className="modal">
-          <div className="modal-content">
-            <h3>Редактирование профиля</h3>
-            <input
-              type="text"
-              value={editedUser.name}
-              onChange={(e) => setEditedUser({ ...editedUser, name: e.target.value })}
-            />
-            <input
-              type="email"
-              value={editedUser.email}
-              onChange={(e) => setEditedUser({ ...editedUser, email: e.target.value })}
-            />
-            <input
-              type="text"
-              value={editedUser.phone}
-              onChange={(e) => setEditedUser({ ...editedUser, phone: e.target.value })}
-            />
-            <button onClick={handleSave}>Сохранить</button>
-            <button onClick={() => setEditing(false)}>Закрыть</button>
-          </div>
+      <div className="profile-container">
+        <div className="profile-info">
+          <p><strong>Name:</strong> {user.first_name}</p>
+          <p><strong>Last Name:</strong> {user.last_name}</p>
+          <p><strong>Email:</strong> {user.email}</p>
+          <p><strong>Phone:</strong> {user.phone}</p>
         </div>
-      )}
-    </div>
+      </div>
   );
 };
 

@@ -59,7 +59,7 @@ const OrderModal = ({ isOpen, onClose, onAddOrder }) => {
     setOrderData((prevData) => ({
       ...prevData,
       products: prevData.products.map((p) =>
-        p.id === id ? { ...p, quantity: Math.max(1, quantity) } : p
+          p.id === id ? { ...p, quantity: Math.max(1, quantity) } : p
       ),
     }));
   };
@@ -73,15 +73,15 @@ const OrderModal = ({ isOpen, onClose, onAddOrder }) => {
 
   const calculateTotal = () => {
     return orderData.products.reduce(
-      (total, product) => total + (product.price * (product.quantity || 1)),
-      0
+        (total, product) => total + (product.price * (product.quantity || 1)),
+        0
     );
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!orderData.title || !orderData.time || !orderData.address) {
-      alert("Заполните все обязательные поля!");
+      alert("Please fill in all required fields!");
       return;
     }
 
@@ -101,73 +101,73 @@ const OrderModal = ({ isOpen, onClose, onAddOrder }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="modal-overlay">
-      <div className="modal-content">
-        <h2>Создать заказ</h2>
-        <form onSubmit={handleSubmit}>
-          <label>Название заказа:</label>
-          <input
-            type="text"
-            name="title"
-            value={orderData.title}
-            onChange={handleChange}
-            required
-          />
+      <div className="modal-overlay">
+        <div className="modal-content">
+          <h2>Create Order</h2>
+          <form onSubmit={handleSubmit}>
+            <label>Order Title:</label>
+            <input
+                type="text"
+                name="title"
+                value={orderData.title}
+                onChange={handleChange}
+                required
+            />
 
-          <label>Клиент:</label>
-          <Select
-            options={clients.map((client) => ({
-              value: client.id,
-              label: `${client.first_name} ${client.last_name}`,
-            }))}
-            value={orderData.client}
-            onChange={handleClientChange}
-            placeholder="Выберите клиента..."
-          />
+            <label>Client:</label>
+            <Select
+                options={clients.map((client) => ({
+                  value: client.id,
+                  label: `${client.first_name} ${client.last_name}`,
+                }))}
+                value={orderData.client}
+                onChange={handleClientChange}
+                placeholder="Select client..."
+            />
 
-          <label>Выбор продуктов:</label>
-          <select onChange={handleProductSelect}>
-            <option value="">Выберите продукт...</option>
-            {products.map((product) => (
-              <option key={product.id} value={product.id}>
-                {product.title} — {product.price} ₽
-              </option>
-            ))}
-          </select>
+            <label>Product Selection:</label>
+            <select onChange={handleProductSelect}>
+              <option value="">Select product...</option>
+              {products.map((product) => (
+                  <option key={product.id} value={product.id}>
+                    {product.title} — {product.price} ₽
+                  </option>
+              ))}
+            </select>
 
-          <ProductList
-            products={orderData.products}
-            onUpdateQuantity={updateQuantity}
-            onRemoveProduct={removeProduct}
-          />
+            <ProductList
+                products={orderData.products}
+                onUpdateQuantity={updateQuantity}
+                onRemoveProduct={removeProduct}
+            />
 
-          <label>Время заказа:</label>
-          <input
-            type="datetime-local"
-            name="time"
-            value={orderData.time}
-            onChange={handleChange}
-            required
-          />
+            <label>Order Time:</label>
+            <input
+                type="datetime-local"
+                name="time"
+                value={orderData.time}
+                onChange={handleChange}
+                required
+            />
 
-          <label>Адрес:</label>
-          <input
-            type="text"
-            name="address"
-            value={orderData.address}
-            onChange={handleChange}
-            required
-          />
+            <label>Address:</label>
+            <input
+                type="text"
+                name="address"
+                value={orderData.address}
+                onChange={handleChange}
+                required
+            />
 
-          <div className="total-price">Итоговая сумма: {calculateTotal()} ₽</div>
+            <div className="total-price">Total Amount: {calculateTotal()} ₽</div>
 
-          <button type="submit">Добавить заказ</button>
-          <button type="button" onClick={onClose}>
-            Отмена
-          </button>
-        </form>
+            <button type="submit">Add Order</button>
+            <button type="button" onClick={onClose}>
+              Cancel
+            </button>
+          </form>
+        </div>
       </div>
-    </div>
   );
 };
 

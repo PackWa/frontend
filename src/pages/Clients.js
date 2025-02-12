@@ -6,7 +6,7 @@ import SearchBar from "../components/SearchBar";
 
 const Clients = () => {
   const [clients, setClients] = useState([]);
-  const [searchQuery, setSearchQuery] = useState(''); // Стейт для поиска
+  const [searchQuery, setSearchQuery] = useState('');
   const [editingClient, setEditingClient] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [addModalOpen, setAddModalOpen] = useState(false);
@@ -21,9 +21,9 @@ const Clients = () => {
         try {
           const clientsData = await fetchClients(token);
           setClients(clientsData);
-          clientsData.forEach(addClient); // Сохраняем клиентов в IndexedDB
+          clientsData.forEach(addClient);
         } catch (error) {
-          console.error("Ошибка загрузки клиентов:", error);
+          console.error("Error loading clients:", error);
         }
       } else {
         const localClients = await getAllClients();
@@ -42,8 +42,8 @@ const Clients = () => {
   const handleDelete = async (id) => {
     if (!token) return;
 
-    const isConfirmed = window.confirm("Вы уверены, что хотите удалить этого клиента?");
-    if (!isConfirmed) return; // Если пользователь отменил, ничего не делаем
+    const isConfirmed = window.confirm("Are you sure you want to delete this client?");
+    if (!isConfirmed) return;
 
     if (isOnline) {
       const success = await deleteClient(id, token);
@@ -77,7 +77,7 @@ const Clients = () => {
         addClient(createdClient);
       }
     } else {
-      const tempClient = { ...newClient, id: Date.now() }; // Временный ID
+      const tempClient = { ...newClient, id: Date.now() };
       setClients([...clients, tempClient]);
       addClient(tempClient);
     }
@@ -90,66 +90,66 @@ const Clients = () => {
   );
 
   return (
-    <div className="clients-container">
-      <div className="controls">
-        <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} text={"🔍 search"} /> {/* Добавляем компонент поиска */}
-        <button className="add-button" onClick={() => setAddModalOpen(true)}>
-          Добавить клиента
-        </button>
-      </div>
-      <div className="table-wrapper">
-        <table>
-          <thead>
-            <tr>
-              <th>Имя</th>
-              <th>Фамилия</th>
-              <th>Телефон</th>
-              <th>Действия</th>
-            </tr>
-          </thead>
-          <tbody>
-          {filteredClients.map((client) => ( // Используем отфильтрованный список клиентов
-              <tr key={client.id}>
-                <td>{client.first_name}</td>
-                <td>{client.last_name}</td>
-                <td>{client.phone}</td>
-                <td>
-                  <button onClick={() => handleEdit(client)}>edit</button>
-                  <button style={{color: "red"}} onClick={() => handleDelete(client.id)}>delete</button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {modalOpen && (
-        <div className="modal">
-          <div className="modal-content">
-            <h3>Редактировать клиента</h3>
-            <input
-              type="text"
-              value={editingClient.first_name}
-              onChange={(e) => setEditingClient({ ...editingClient, first_name: e.target.value })}
-            />
-            <input
-              type="text"
-              value={editingClient.last_name}
-              onChange={(e) => setEditingClient({ ...editingClient, last_name: e.target.value })}
-            />
-            <input
-              type="text"
-              value={editingClient.phone}
-              onChange={(e) => setEditingClient({ ...editingClient, phone: e.target.value })}
-            />
-            <button onClick={handleSave}>Сохранить</button>
-            <button onClick={() => setModalOpen(false)}>Закрыть</button>
-          </div>
+      <div className="clients-container">
+        <div className="controls">
+          <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} text={"🔍 search"} />
+          <button className="add-button" onClick={() => setAddModalOpen(true)}>
+            Add Client
+          </button>
         </div>
-      )}
+        <div className="table-wrapper">
+          <table>
+            <thead>
+            <tr>
+              <th>Name</th>
+              <th>Surname</th>
+              <th>Phone</th>
+              <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            {filteredClients.map((client) => (
+                <tr key={client.id}>
+                  <td>{client.first_name}</td>
+                  <td>{client.last_name}</td>
+                  <td>{client.phone}</td>
+                  <td>
+                    <button onClick={() => handleEdit(client)}>edit</button>
+                    <button style={{color: "red"}} onClick={() => handleDelete(client.id)}>delete</button>
+                  </td>
+                </tr>
+            ))}
+            </tbody>
+          </table>
+        </div>
 
-      <AddClientModal isOpen={addModalOpen} onClose={() => setAddModalOpen(false)} onSave={handleAddClient} />
-    </div>
+        {modalOpen && (
+            <div className="modal">
+              <div className="modal-content">
+                <h3>Edit Client</h3>
+                <input
+                    type="text"
+                    value={editingClient.first_name}
+                    onChange={(e) => setEditingClient({ ...editingClient, first_name: e.target.value })}
+                />
+                <input
+                    type="text"
+                    value={editingClient.last_name}
+                    onChange={(e) => setEditingClient({ ...editingClient, last_name: e.target.value })}
+                />
+                <input
+                    type="text"
+                    value={editingClient.phone}
+                    onChange={(e) => setEditingClient({ ...editingClient, phone: e.target.value })}
+                />
+                <button onClick={handleSave}>Save</button>
+                <button onClick={() => setModalOpen(false)}>Close</button>
+              </div>
+            </div>
+        )}
+
+        <AddClientModal isOpen={addModalOpen} onClose={() => setAddModalOpen(false)} onSave={handleAddClient} />
+      </div>
   );
 };
 

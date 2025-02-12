@@ -19,19 +19,16 @@ const EditOrderModal = ({ isOpen, onClose, onUpdateOrder, order, onDeleteOrder }
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const token = localStorage.getItem("access_token");
 
-  // Загрузка клиентов и продуктов
   useEffect(() => {
     const fetchData = async () => {
       if (!token) return;
 
       if (isOnline) {
-        // Если интернет есть, загружаем данные с сервера
         const clients = await fetchClients(token);
         let products = await fetchProducts(token);
         setClients(clients);
         setProducts(products);
       } else {
-        // Если интернета нет, загружаем данные из IndexedDB
         const localProducts = await getAllProducts();
         const localClients = await getAllClients();
         setClients(localClients);
@@ -42,20 +39,19 @@ const EditOrderModal = ({ isOpen, onClose, onUpdateOrder, order, onDeleteOrder }
     fetchData();
   }, [token, isOnline]);
 
-  // Загрузка фотографий продуктов из IndexedDB при открытии модального окна
   useEffect(() => {
     const loadProductImages = async () => {
       if (order && order.products.length > 0) {
         const localProducts = await getAllProducts();
 
         const updatedProducts = await Promise.all(
-          order.products.map(async (p) => {
-            const foundProduct = localProducts.find(prod => prod.id === p.id);
-            return {
-              ...p,
-              image: foundProduct?.image || "", // Используем плейсхолдер, если фото нет
-            };
-          })
+            order.products.map(async (p) => {
+              const foundProduct = localProducts.find(prod => prod.id === p.id);
+              return {
+                ...p,
+                image: foundProduct?.image || "",
+              };
+            })
         );
 
         setOrderData(prevData => ({
@@ -70,14 +66,13 @@ const EditOrderModal = ({ isOpen, onClose, onUpdateOrder, order, onDeleteOrder }
     }
   }, [order, isOpen]);
 
-  // Обновление данных заказа при изменении order, clients или products
   useEffect(() => {
     if (order && products.length > 0) {
       const updatedProducts = order.products.map(p => {
         const foundProduct = products.find(prod => prod.id === p.id);
         return {
           ...p,
-          title: foundProduct?.title || "Неизвестный продукт",
+          title: foundProduct?.title || "Unknown product",
         };
       });
 
@@ -85,7 +80,7 @@ const EditOrderModal = ({ isOpen, onClose, onUpdateOrder, order, onDeleteOrder }
         title: order.title,
         client: clients.find(client => client.id === order.client_id) ? { value: order.client_id, label: `${order.client_name}` } : "",
         products: updatedProducts,
-        time: order.date ? new Date(order.date).toISOString().slice(0, 16) : "", // Форматируем дату для input[type="datetime-local"]
+        time: order.date ? new Date(order.date).toISOString().slice(0, 16) : "",
         address: order.address || "",
       });
     }
@@ -106,7 +101,7 @@ const EditOrderModal = ({ isOpen, onClose, onUpdateOrder, order, onDeleteOrder }
       const newProduct = {
         ...product,
         quantity: 1,
-        image: foundProduct?.image || "", // Используем плейсхолдер, если фото нет
+        image: foundProduct?.image || "",
       };
 
       setOrderData({
@@ -119,17 +114,16 @@ const EditOrderModal = ({ isOpen, onClose, onUpdateOrder, order, onDeleteOrder }
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!orderData.title || !orderData.time || !orderData.address) {
-      alert("Заполните все обязательные поля!");
+      alert("Please fill in all required fields!");
       return;
     }
 
-    // Преобразуем время в формат, который ожидает сервер
     const formattedDate = new Date(orderData.time).toISOString();
 
     const updatedOrder = {
       id: order.id,
       title: orderData.title,
-      start: formattedDate, // Используем отформатированную дату
+      start: formattedDate,
       client_id: orderData.client?.value || null,
       products: orderData.products,
       address: orderData.address,
@@ -142,78 +136,78 @@ const EditOrderModal = ({ isOpen, onClose, onUpdateOrder, order, onDeleteOrder }
   if (!isOpen) return null;
 
   return (
-    <div className="modal-overlay">
-      <div className="modal-content">
-        <h2>Редактировать заказ</h2>
-        <form onSubmit={handleSubmit}>
-          <label>Название заказа:</label>
-          <input
-            type="text"
-            name="title"
-            value={orderData.title}
-            onChange={(e) => setOrderData({ ...orderData, title: e.target.value })}
-            required
-          />
+      <div className="modal-overlay">
+        <div className="modal-content">
+          <h2>Edit Order</h2>
+          <form onSubmit={handleSubmit}>
+            <label>Order Title:</label>
+            <input
+                type="text"
+                name="title"
+                value={orderData.title}
+                onChange={(e) => setOrderData({ ...orderData, title: e.target.value })}
+                required
+            />
 
-          <label>Клиент:</label>
-          <Select
-            options={clients.map(client => ({
-              value: client.id,
-              label: `${client.first_name} ${client.last_name}`,
-            }))}
-            value={orderData.client}
-            onChange={(selectedClient) => setOrderData({ ...orderData, client: selectedClient })}
-            placeholder="Выберите клиента..."
-          />
+            <label>Client:</label>
+            <Select
+                options={clients.map(client => ({
+                  value: client.id,
+                  label: `${client.first_name} ${client.last_name}`,
+                }))}
+                value={orderData.client}
+                onChange={(selectedClient) => setOrderData({ ...orderData, client: selectedClient })}
+                placeholder="Select client..."
+            />
 
-          <label>Выбор продуктов:</label>
-          <select onChange={handleProductSelect}>
-            <option value="">Выберите продукт...</option>
-            {products.map((product) => (
-              <option key={product.id} value={product.id}>
-                {product.title} — {product.price} ₽
-              </option>
-            ))}
-          </select>
+            <label>Product Selection:</label>
+            <select onChange={handleProductSelect}>
+              <option value="">Select product...</option>
+              {products.map((product) => (
+                  <option key={product.id} value={product.id}>
+                    {product.title} — {product.price} ₽
+                  </option>
+              ))}
+            </select>
 
-          <ProductList
-            products={orderData.products}
-            onUpdateQuantity={(id, quantity) => setOrderData({
-              ...orderData,
-              products: orderData.products.map(p => (p.id === id ? { ...p, quantity } : p)),
-            })}
-            onRemoveProduct={(id) => setOrderData({
-              ...orderData,
-              products: orderData.products.filter(p => p.id !== id),
-            })}
-          />
+            <ProductList
+                products={orderData.products}
+                onUpdateQuantity={(id, quantity) => setOrderData({
+                  ...orderData,
+                  products: orderData.products.map(p => (p.id === id ? { ...p, quantity } : p)),
+                })}
+                onRemoveProduct={(id) => setOrderData({
+                  ...orderData,
+                  products: orderData.products.filter(p => p.id !== id),
+                })}
+            />
 
-          <label>Дата и время:</label>
-          <input
-            type="datetime-local"
-            name="time"
-            value={orderData.time}
-            onChange={(e) => setOrderData({ ...orderData, time: e.target.value })}
-            required
-          />
+            <label>Date and Time:</label>
+            <input
+                type="datetime-local"
+                name="time"
+                value={orderData.time}
+                onChange={(e) => setOrderData({ ...orderData, time: e.target.value })}
+                required
+            />
 
-          <label>Адрес:</label>
-          <input
-            type="text"
-            name="address"
-            value={orderData.address}
-            onChange={(e) => setOrderData({ ...orderData, address: e.target.value })}
-            required
-          />
+            <label>Address:</label>
+            <input
+                type="text"
+                name="address"
+                value={orderData.address}
+                onChange={(e) => setOrderData({ ...orderData, address: e.target.value })}
+                required
+            />
 
-          <div className="modal-actions">
-            <button type="submit">Сохранить изменения</button>
-            <button type="button" onClick={onClose}>Отмена</button>
-            <button type="button" className="delete-button" onClick={handleDelete}>Удалить заказ</button>
-          </div>
-        </form>
+            <div className="modal-actions">
+              <button type="submit">Save Changes</button>
+              <button type="button" onClick={onClose}>Cancel</button>
+              <button type="button" className="delete-button" onClick={handleDelete}>Delete Order</button>
+            </div>
+          </form>
+        </div>
       </div>
-    </div>
   );
 };
 

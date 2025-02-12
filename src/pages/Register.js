@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import '../App.css';
-import { registerUser } from '../api/authorizationService';
+import "../App.css";
+import { registerUser } from "../api/authorizationService";
 
 const Register = () => {
     const [first_name, setFirstName] = useState("");
@@ -11,28 +11,28 @@ const Register = () => {
     const [password, setPassword] = useState("");
     const [confirm_password, setConfirmPassword] = useState("");
     const [error_message, setErrorMessage] = useState("");
-    const [isLoading, setIsLoading] = useState(false); // Статус загрузки
-    const navigate = useNavigate(); // Используем useNavigate
+    const [isLoading, setIsLoading] = useState(false);
+    const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
         if (password !== confirm_password) {
-            setErrorMessage("Пароли не совпадают");
+            setErrorMessage("Passwords do not match");
             return;
         }
 
         setIsLoading(true);
-        setErrorMessage(""); // Сбрасываем ошибку перед отправкой
+        setErrorMessage("");
 
         try {
             const response = await registerUser({ first_name, last_name, phone, email, password });
-            console.log(response.message); // Ответ от сервера
-            navigate("/login"); // Перенаправляем на страницу логина
+            console.log(response.message);
+            navigate("/login");
         } catch (error) {
-            setErrorMessage(error.message); // Показываем ошибку
+            setErrorMessage(error.message);
         } finally {
-            setIsLoading(false); // Останавливаем индикатор загрузки
+            setIsLoading(false);
         }
     };
 
@@ -41,7 +41,7 @@ const Register = () => {
             <div className="register-card">
                 <form onSubmit={handleSubmit} className="register-form">
                     <div className="form-group">
-                        <label htmlFor="first_name">Имя:</label>
+                        <label htmlFor="first_name">First Name:</label>
                         <input
                             type="text"
                             id="first_name"
@@ -52,7 +52,7 @@ const Register = () => {
                     </div>
 
                     <div className="form-group">
-                        <label htmlFor="last_name">Фамилия:</label>
+                        <label htmlFor="last_name">Last Name:</label>
                         <input
                             type="text"
                             id="last_name"
@@ -63,7 +63,7 @@ const Register = () => {
                     </div>
 
                     <div className="form-group">
-                        <label htmlFor="phone">Телефон:</label>
+                        <label htmlFor="phone">Phone:</label>
                         <input
                             type="tel"
                             id="phone"
@@ -74,7 +74,7 @@ const Register = () => {
                     </div>
 
                     <div className="form-group">
-                        <label htmlFor="email">Электронная почта:</label>
+                        <label htmlFor="email">Email:</label>
                         <input
                             type="email"
                             id="email"
@@ -85,7 +85,7 @@ const Register = () => {
                     </div>
 
                     <div className="form-group">
-                        <label htmlFor="password">Пароль:</label>
+                        <label htmlFor="password">Password:</label>
                         <input
                             type="password"
                             id="password"
@@ -96,7 +96,7 @@ const Register = () => {
                     </div>
 
                     <div className="form-group">
-                        <label htmlFor="confirm_password">Подтвердите пароль:</label>
+                        <label htmlFor="confirm_password">Confirm Password:</label>
                         <input
                             type="password"
                             id="confirm_password"
@@ -109,12 +109,12 @@ const Register = () => {
                     {error_message && <p className="error-message">{error_message}</p>}
 
                     <button type="submit" className="submit-button" disabled={isLoading}>
-                        {isLoading ? "Загрузка..." : "Зарегистрироваться"}
+                        {isLoading ? "Loading..." : "Sign Up"}
                     </button>
                 </form>
 
                 <p className="login-link">
-                    Уже есть аккаунт? <Link to="/login">Войти</Link>
+                    Already have an account? <Link to="/login">Log In</Link>
                 </p>
             </div>
         </div>

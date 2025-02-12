@@ -9,7 +9,7 @@ import { fetchOrders, createOrder, updateOrder, deleteOrder } from "../api/Order
 import { fetchClients } from "../api/ClientService";
 import { fetchProducts } from "../api/ProductService";
 import { getAllOrders, addOrder, deleteOrderFromDB } from "../services/database";
-import { requestNotificationPermission, scheduleNotification, cancelNotifications } from "../services/notificationService"; // Импортируем функции уведомлений
+import { requestNotificationPermission, scheduleNotification, cancelNotifications } from "../services/notificationService";
 
 const localizer = momentLocalizer(moment);
 
@@ -21,54 +21,53 @@ const Agenda = () => {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const token = localStorage.getItem("access_token");
 
-  // Запрос разрешения на уведомления при загрузке компонента
   useEffect(() => {
-    requestNotificationPermission(); // Используем функцию из notificationService
+    requestNotificationPermission();
   }, []);
 
   useEffect(() => {
     const loadOrders = async () => {
       if (!token) return;
-    
+
       if (isOnline) {
         try {
           const [orders, clients, products] = await Promise.all([fetchOrders(token), fetchClients(token), fetchProducts(token)]);
-    
+
           const clientsMap = clients.reduce((map, client) => {
             map[client.id] = `${client.first_name} ${client.last_name}`;
             return map;
           }, {});
-    
+
           const productsMap = products.reduce((map, product) => {
             map[product.id] = product.title;
             return map;
           }, {});
-    
+
           const processedOrders = orders.map(order => {
             const orderProducts = order.products.map(p => ({
               id: p.product_id,
-              title: productsMap[p.product_id] || "Неизвестный продукт",
+              title: productsMap[p.product_id] || "Unknown product",
               quantity: p.quantity || 1,
               price: p.price_at_order || 0,
             }));
-    
+
             return {
               ...order,
-              start: new Date(order.date), // Преобразуем дату в объект Date
-              end: new Date(order.date),  // Преобразуем дату в объект Date
-              client_name: clientsMap[order.client_id] || "Не указан",
+              start: new Date(order.date),
+              end: new Date(order.date),
+              client_name: clientsMap[order.client_id] || "Not specified",
               products: orderProducts,
               total: orderProducts.reduce((sum, p) => sum + p.price * p.quantity, 0),
             };
           });
-    
+
           setEvents(processedOrders);
           processedOrders.forEach(order => {
             addOrder(order);
             scheduleNotification(order);
           });
         } catch (error) {
-          console.error("Ошибка загрузки заказов:", error);
+          console.error("Error loading orders:", error);
         }
       } else {
         const localOrders = await getAllOrders();
@@ -97,101 +96,92 @@ const Agenda = () => {
 
   const handleAddOrUpdateOrder = async (order) => {
     if (!navigator.onLine) {
-      alert("Нет интернет-соединения. Действие невозможно.");
+      alert("No internet connection. Action is not possible.");
       return;
     }
-  
+
     if (!token) return;
-  
+
     if (isOnline) {
       try {
         const [updatedProducts, updatedClients] = await Promise.all([
           fetchProducts(token),
           fetchClients(token),
         ]);
-  
+
         const productsMap = updatedProducts.reduce((map, product) => {
           map[product.id] = { title: product.title, price: product.price };
           return map;
         }, {});
-  
+
         const clientsMap = updatedClients.reduce((map, client) => {
           map[client.id] = `${client.first_name} ${client.last_name}`;
           return map;
         }, {});
-  
-        // Форматируем дату в ISO 8601 с указанием временной зоны
+
         const formattedDate = moment(order.start).format("YYYY-MM-DDTHH:mm:ssZ");
-        console.log("formate", formattedDate)
-  
+
         const formattedOrder = {
           title: order.title,
           address: order.address,
-          date: formattedDate, // Используем отформатированную дату
-          client_id: order.client_id !== "Не указан" ? parseInt(order.client_id) || null : null,
+          date: formattedDate,
+          client_id: order.client_id !== "Not specified" ? parseInt(order.client_id) || null : null,
           products: order.products.map(p => ({
             product_id: p.id,
             quantity: p.quantity || 1,
           })),
         };
-  
+
         let newOrder;
         if (order.id) {
-          // Обновляем существующий заказ
           newOrder = await updateOrder(order.id, formattedOrder, token);
         } else {
-          // Создаем новый заказ
           newOrder = await createOrder(formattedOrder, token);
         }
-  
+
         if (newOrder) {
           const processedOrder = {
             ...newOrder,
             start: new Date(newOrder.date),
             end: new Date(newOrder.date),
-            client_name: clientsMap[newOrder.client_id] || "Не указан",
+            client_name: clientsMap[newOrder.client_id] || "Not specified",
             products: newOrder.products.map(p => ({
               id: p.product_id,
-              title: productsMap[p.product_id]?.title || "Неизвестный продукт",
+              title: productsMap[p.product_id]?.title || "Unknown product",
               quantity: p.quantity || 1,
               price: p.price_at_order || 0,
             })),
             total: newOrder.products.reduce((sum, p) => sum + (p.price_at_order || 0) * (p.quantity || 1), 0),
           };
-  
-          // Обновляем состояние events
+
           if (order.id) {
-            // Если заказ обновляется, заменяем его в списке
             setEvents(events.map(event => (event.id === order.id ? processedOrder : event)));
           } else {
-            // Если заказ новый, добавляем его в список
             setEvents([...events, processedOrder]);
           }
-  
-          // Сохраняем заказ в IndexedDB
+
           addOrder(processedOrder);
           scheduleNotification(processedOrder);
         }
       } catch (error) {
-        console.error("Ошибка при создании/обновлении заказа:", error);
+        console.error("Error creating/updating order:", error);
       }
     } else {
-      // Оффлайн-режим: сохраняем временный заказ
-      const tempOrder = { ...order, id: Date.now() }; // Временный ID
+      const tempOrder = { ...order, id: Date.now() };
       setEvents([...events, tempOrder]);
       addOrder(tempOrder);
       scheduleNotification(tempOrder);
     }
-  
+
     closeModals();
   };
-  
+
   const handleDeleteOrder = async (orderId) => {
     if (!navigator.onLine) {
-      alert("Нет интернет-соединения. Действие невозможно.");
+      alert("No internet connection. Action is not possible.");
       return;
     }
-    
+
     if (!token) return;
 
     if (isOnline) {
@@ -199,43 +189,45 @@ const Agenda = () => {
       if (success) {
         setEvents(events.filter(event => event.id !== orderId));
         deleteOrderFromDB(orderId);
-        cancelNotifications(orderId); // Используем функцию из notificationService
+        cancelNotifications(orderId);
       }
     } else {
       setEvents(events.filter(event => event.id !== orderId));
       deleteOrderFromDB(orderId);
-      cancelNotifications(orderId); // Используем функцию из notificationService
+      cancelNotifications(orderId);
     }
 
     closeModals();
   };
 
   return (
-    <div className="main-page">
-      <button className="add-order-btn" onClick={openCreateModal}>
-        Добавить заказ
-      </button>
+      <div className="main-page">
+        <button className="add-order-btn" onClick={openCreateModal}>
+          Add Order
+        </button>
 
-      <div className="agenda-container">
-        <Calendar
-          localizer={localizer}
-          events={events}
-          startAccessor="start"
-          endAccessor="end"
-          views={["agenda"]}
-          defaultView="agenda"
-          style={{ minHeight: "90%", marginTop: 20 }}
-          components={{ event: (props) => (
-            <div onClick={() => openEditModal(props.event)} style={{ cursor: 'pointer' }}>
-              <CustomEvent {...props} />
-            </div>
-          ) }}
-        />
+        <div className="agenda-container">
+          <Calendar
+              localizer={localizer}
+              events={events}
+              startAccessor="start"
+              endAccessor="end"
+              views={["agenda"]}
+              defaultView="agenda"
+              style={{ minHeight: "90%", marginTop: 20 }}
+              components={{
+                event: (props) => (
+                    <div onClick={() => openEditModal(props.event)} style={{ cursor: 'pointer' }}>
+                      <CustomEvent {...props} />
+                    </div>
+                ),
+              }}
+          />
 
-        <OrderModal isOpen={modalIsOpen} onClose={closeModals} onAddOrder={handleAddOrUpdateOrder} />
-        <EditOrderModal isOpen={editModalIsOpen} onClose={closeModals} onUpdateOrder={handleAddOrUpdateOrder} onDeleteOrder={handleDeleteOrder} order={selectedOrder} />
+          <OrderModal isOpen={modalIsOpen} onClose={closeModals} onAddOrder={handleAddOrUpdateOrder} />
+          <EditOrderModal isOpen={editModalIsOpen} onClose={closeModals} onUpdateOrder={handleAddOrUpdateOrder} onDeleteOrder={handleDeleteOrder} order={selectedOrder} />
+        </div>
       </div>
-    </div>
   );
 };
 

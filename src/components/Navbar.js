@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
-import {Link, useLocation, useNavigate} from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { FiMenu, FiX } from "react-icons/fi";
 
 const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(() => !!localStorage.getItem("access_token"));
   const [isOnline, setIsOnline] = useState(navigator.onLine);
-  const navigate = useNavigate(); // Используем useNavigate
-  const location = useLocation(); // Получаем текущий путь
+  const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     const updateAuthStatus = () => {
@@ -23,11 +23,11 @@ const Navbar = () => {
 
     window.addEventListener("online", updateOnlineStatus);
     window.addEventListener("offline", updateOnlineStatus);
-    
+
     return () => {
       window.removeEventListener("tokenChanged", updateAuthStatus);
-      window.removeEventListener("online", () => setIsOnline(true));
-      window.removeEventListener("offline", () => setIsOnline(false));
+      window.removeEventListener("online", updateOnlineStatus);
+      window.removeEventListener("offline", updateOnlineStatus);
     };
 
   }, []);
@@ -45,57 +45,57 @@ const Navbar = () => {
   const getPageTitle = () => {
     switch (location.pathname) {
       case '/':
-        return 'Главная';
+        return 'Home';
       case '/clients':
-        return 'Клиенты';
+        return 'Clients';
       case '/products':
-        return 'Продукты';
+        return 'Products';
       case '/profile':
-        return 'Профиль';
+        return 'Profile';
       case '/login':
-        return 'Вход';
+        return 'Login';
       case '/register':
-        return 'Регистрация';
+        return 'Register';
       default:
-        return 'Менеджер';
+        return 'Manager';
     }
   };
 
   return (
-    <>
-      <header className="navbar">
-        <button className="menu-button" onClick={toggleMenu}>
-          <FiMenu size={30} />
-        </button>
-        <h1 className="logo">{getPageTitle()}</h1>
-        <div className="status" style={{ color: isOnline ? "#4CAF50" : "#F44336" }}>
-          {isOnline ? "Онлайн" : "Оффлайн"}
-        </div>
-      </header>
+      <>
+        <header className="navbar">
+          <button className="menu-button" onClick={toggleMenu}>
+            <FiMenu size={30} />
+          </button>
+          <h1 className="logo">{getPageTitle()}</h1>
+          <div className="status" style={{ color: isOnline ? "#4CAF50" : "#F44336" }}>
+            {isOnline ? "Online" : "Offline"}
+          </div>
+        </header>
 
-      {menuOpen && <div className="overlay" onClick={toggleMenu}></div>}
+        {menuOpen && <div className="overlay" onClick={toggleMenu}></div>}
 
-      <nav className={`side-menu ${menuOpen ? "open" : ""}`}>
-        <button className="close-button" onClick={toggleMenu}>
-          <FiX size={30} />
-        </button>
-        <ul>
-          <li><Link to="/" onClick={toggleMenu}>Главная</Link></li>
-          <li><Link to="/clients" onClick={toggleMenu}>Клиенты</Link></li>
-          <li><Link to="/products" onClick={toggleMenu}>Продукты</Link></li>
-          <li><Link to="/profile" onClick={toggleMenu}>Профиль</Link></li>
-          {!isLoggedIn ? (
-            <li><Link to="/register" onClick={toggleMenu}>Регистрация</Link></li>
-          ) : (
-            <li>
-              <button className="logout-button" onClick={handleLogout} style={{ color: "red" }}>
-                Выход
-              </button>
-            </li>
-          )}
-        </ul>
-      </nav>
-    </>
+        <nav className={`side-menu ${menuOpen ? "open" : ""}`}>
+          <button className="close-button" onClick={toggleMenu}>
+            <FiX size={30} />
+          </button>
+          <ul>
+            <li><Link to="/" onClick={toggleMenu}>Home</Link></li>
+            <li><Link to="/clients" onClick={toggleMenu}>Clients</Link></li>
+            <li><Link to="/products" onClick={toggleMenu}>Products</Link></li>
+            <li><Link to="/profile" onClick={toggleMenu}>Profile</Link></li>
+            {!isLoggedIn ? (
+                <li><Link to="/register" onClick={toggleMenu}>Register</Link></li>
+            ) : (
+                <li>
+                  <button className="logout-button" onClick={handleLogout} style={{ color: "red" }}>
+                    Logout
+                  </button>
+                </li>
+            )}
+          </ul>
+        </nav>
+      </>
   );
 };
 

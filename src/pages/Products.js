@@ -1,27 +1,32 @@
 import React, { useState, useEffect } from "react";
-import {fetchProducts, createProduct, updateProduct, deleteProduct, fetchProductPhoto} from "../api/ProductService";
 import {
-  getAllProducts,
-  blobToBase64,
-  addProductDB,
-  updateProductDB,
-  deleteProductDB,
-  clearProducts
+    fetchProducts,
+    createProduct,
+    updateProduct,
+    deleteProduct,
+    fetchProductPhoto
+} from "../api/ProductService";
+import {
+    getAllProducts,
+    blobToBase64,
+    addProductDB,
+    updateProductDB,
+    deleteProductDB,
+    clearProducts
 } from "../services/database";
 import AddProductModal from "../components/AddProductModal";
-import photo from "../assets/camera_placeholder.jpg";
 import ProductCard from "../components/ProductCard";
 import SkeletonProductCard from "../components/SkeletonProductCard";
 import SearchBar from "../components/SearchBar";
 
 const Products = () => {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [addModalOpen, setAddModalOpen] = useState(false);
-  const [editModalOpen, setEditModalOpen] = useState(false);
-  const [editingProduct, setEditingProduct] = useState(null);
-  const token = localStorage.getItem("access_token");
+    const [searchQuery, setSearchQuery] = useState("");
+    const [products, setProducts] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [addModalOpen, setAddModalOpen] = useState(false);
+    const [editModalOpen, setEditModalOpen] = useState(false);
+    const [editingProduct, setEditingProduct] = useState(null);
+    const token = localStorage.getItem("access_token");
 
     const filteredProducts = products.filter(product =>
         product.title.toLowerCase().includes(searchQuery.toLowerCase())
@@ -34,21 +39,17 @@ const Products = () => {
             try {
                 setLoading(true);
 
-                // Шаг 1: Загружаем кэшированные данные
                 const offlineProducts = await getAllProducts();
                 if (isMounted && offlineProducts.length > 0) {
                     setProducts(offlineProducts);
                 }
 
-                // Шаг 2: Если онлайн - загружаем свежие данные
                 if (navigator.onLine) {
                     try {
                         const serverProducts = await fetchProducts(token);
 
-                        // Обработка фотографий
                         const processedProducts = await Promise.all(
                             serverProducts.map(async (product) => {
-                                // Проверяем есть ли фото в кэше
                                 const cachedProduct = offlineProducts.find(p => p.id === product.id);
 
                                 if (cachedProduct?.photo === product.photo && cachedProduct.image) {
@@ -69,14 +70,13 @@ const Products = () => {
                             })
                         );
 
-                        // Шаг 3: Обновляем состояние и кэш
                         if (isMounted) {
                             setProducts(processedProducts);
                             await clearProducts();
                             await Promise.all(processedProducts.map(p => addProductDB(p)));
                         }
                     } catch (error) {
-                        console.error("Ошибка загрузки продуктов:", error);
+                        console.error("Error loading products:", error);
                     }
                 }
             } finally {
@@ -89,7 +89,6 @@ const Products = () => {
     }, [token]);
 
     const handleAddProduct = async (formData) => {
-        console.log("FORM DATA CREATE PRODUCT", formData);
         try {
             const createdProduct = await createProduct(formData, token);
             if (createdProduct) {
@@ -99,20 +98,20 @@ const Products = () => {
                         const base64Photo = await blobToBase64(photoBlob);
                         createdProduct.image = base64Photo;
                     } catch (error) {
-                        console.error("Ошибка загрузки фото:", error);
+                        console.error("Error loading photo:", error);
                     }
                 }
                 setProducts(prev => [...prev, createdProduct]);
                 await addProductDB(createdProduct);
             }
         } catch (error) {
-            console.error("Ошибка создания продукта:", error);
+            console.error("Error creating product:", error);
         }
     };
 
     const handleUpdateProduct = async (updatedProduct) => {
         if (!navigator.onLine) {
-            alert("Нет интернет-соединения. Действие невозможно.");
+            alert("No internet connection. Action not possible.");
             return;
         }
 
@@ -123,13 +122,11 @@ const Products = () => {
                     try {
                         const photoBlob = await fetchProductPhoto(token, updated.photo);
                         const base64Photo = await blobToBase64(photoBlob);
-                        // Обновляем поле image в объекте продукта
                         updated.image = base64Photo;
                     } catch (error) {
-                        console.error("Ошибка загрузки фото:", error);
+                        console.error("Error loading photo:", error);
                     }
                 } else {
-                    // Если фотография не изменилась, оставляем локальное значение image
                     updated.image = editingProduct.image;
                 }
 
@@ -140,17 +137,17 @@ const Products = () => {
             }
             setEditModalOpen(false);
         } catch (error) {
-            console.error("Ошибка обновления продукта:", error);
+            console.error("Error updating product:", error);
         }
     };
 
     const handleDeleteProduct = async (id) => {
         if (!navigator.onLine) {
-            alert("Нет интернет-соединения. Действие невозможно.");
+            alert("No internet connection. Action not possible.");
             return;
         }
 
-        const isConfirmed = window.confirm("Вы уверены, что хотите удалить этот продукт?");
+        const isConfirmed = window.confirm("Are you sure you want to delete this product?");
         if (!isConfirmed) return;
 
         try {
@@ -158,56 +155,53 @@ const Products = () => {
             setProducts(prev => prev.filter(p => p.id !== id));
             await deleteProductDB(id);
         } catch (error) {
-            console.error("Ошибка удаления:", error);
+            console.error("Error deleting product:", error);
         }
     };
 
+    if (loading) return <div>Loading...</div>;
 
-  if (loading) return <div>Загрузка...</div>;
+    return (
+        <div className="products-container">
+            <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} text={"🔍 Search"} />
+            <button className="add-product" onClick={() => setAddModalOpen(true)}>
+                Add Product
+            </button>
 
+            <div className="products-grid">
+                {loading ? (
+                    Array.from({ length: 6 }).map((_, i) => (
+                        <SkeletonProductCard key={`skeleton-${i}`} />
+                    ))
+                ) : (
+                    filteredProducts.map(product => (
+                        <ProductCard
+                            key={product.id}
+                            product={product}
+                            onEdit={() => {
+                                setEditingProduct(product);
+                                setEditModalOpen(true);
+                            }}
+                            onDelete={handleDeleteProduct}
+                        />
+                    ))
+                )}
+            </div>
 
-  return (
-      <div className="products-container">
-          <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} text={"🔍 search"} /> {/* Добавляем компонент поиска */}
-        <button className="add-product" onClick={() => setAddModalOpen(true)}>
-          Добавить продукт
-        </button>
+            <AddProductModal
+                isOpen={addModalOpen}
+                onClose={() => setAddModalOpen(false)}
+                onSave={handleAddProduct}
+            />
 
-          <div className="products-grid">
-              {loading ? (
-                  // Показываем 6 скелетонов во время загрузки
-                  Array.from({ length: 6 }).map((_, i) => (
-                      <SkeletonProductCard key={`skeleton-${i}`} />
-                  ))
-              ) : (
-                  filteredProducts.map(product => (
-                      <ProductCard
-                          key={product.id}
-                          product={product}
-                          onEdit={() => {
-                              setEditingProduct(product);
-                              setEditModalOpen(true);
-                          }}
-                          onDelete={handleDeleteProduct}
-                      />
-                  ))
-              )}
-          </div>
-
-        <AddProductModal
-            isOpen={addModalOpen}
-            onClose={() => setAddModalOpen(false)}
-            onSave={handleAddProduct}
-        />
-
-        <AddProductModal
-            isOpen={editModalOpen}
-            onClose={() => setEditModalOpen(false)}
-            onSave={handleUpdateProduct}
-            product={editingProduct}
-        />
-      </div>
-  );
+            <AddProductModal
+                isOpen={editModalOpen}
+                onClose={() => setEditModalOpen(false)}
+                onSave={handleUpdateProduct}
+                product={editingProduct}
+            />
+        </div>
+    );
 };
 
 export default Products;

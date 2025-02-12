@@ -1,10 +1,8 @@
 import axios from "axios";
 import config from "../config";
 
-
 const API_URL = config.BASE_URL + "/user";
 
-// Функция для регистрации
 export const registerUser = async (userData) => {
     try {
         const response = await axios.post(`${API_URL}/register`, userData, {
@@ -12,19 +10,16 @@ export const registerUser = async (userData) => {
                 "Content-Type": "application/json",
             },
         });
-        return response.data; // возвращаем данные из ответа
+        return response.data;
     } catch (error) {
         if (error.response) {
-            // Сервер вернул ошибку
             throw error.response.data;
         } else {
-            // Ошибка сети или другой тип ошибки
-            throw new Error("Что-то пошло не так. Попробуйте позже.");
+            throw new Error("Something went wrong. Please try again later.");
         }
     }
 };
 
-// Функция для входа
 export const loginUser = async (loginData) => {
     try {
         const response = await axios.post(`${API_URL}/login`, loginData, {
@@ -32,14 +27,12 @@ export const loginUser = async (loginData) => {
                 "Content-Type": "application/json",
             },
         });
-        return response.data; // возвращаем данные из ответа
+        return response.data;
     } catch (error) {
         if (error.response) {
-            // Сервер вернул ошибку
             throw error.response.data;
         } else {
-            // Ошибка сети или другой тип ошибки
-            throw new Error("Что-то пошло не так. Попробуйте позже.");
+            throw new Error("Something went wrong. Please try again later.");
         }
     }
 };
