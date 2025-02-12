@@ -1,3 +1,26 @@
+/**
+ * Clients Component
+ *
+ * This component handles the management of client data, including viewing, searching,
+ * adding, editing, and deleting clients. It supports offline and online modes, where
+ * client data is either fetched from the server or from the local database, depending
+ * on the network status. The component also includes a modal for adding or editing clients
+ * and integrates search functionality for filtering the displayed client list.
+ *
+ * Key Features:
+ * - Fetches client data from the server when online and from the local database when offline.
+ * - Allows users to add, edit, and delete clients.
+ * - Provides a search bar to filter clients by their name or phone number.
+ * - Uses modals for adding and editing clients.
+ * - Syncs changes with the server when online.
+ *
+ * Usage:
+ * - Requires an authentication token for interacting with the server API.
+ * - On editing or adding a client, the modal form collects and updates client information.
+ * - Clients can be filtered by their first name, last name, or phone number using the search bar.
+ */
+
+
 import React, { useState, useEffect } from "react";
 import { fetchClients, createClient, updateClient, deleteClient } from "../api/ClientService";
 import AddClientModal from "../components/AddClientModal";
