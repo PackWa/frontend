@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import "../App.css";
-import { loginUser } from "../api/authorizationService";
+import '../App.css';
+import { loginUser } from '../api/authorizationService';
 
 const Login = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-    const [errorMessage, setErrorMessage] = useState("");
+    const [error_message, setErrorMessage] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
 
@@ -18,6 +18,7 @@ const Login = () => {
 
         try {
             const response = await loginUser({ email, password });
+            console.log(response.message);
             localStorage.setItem("access_token", response.access_token);
             window.dispatchEvent(new Event("tokenChanged"));
             navigate("/");
@@ -29,9 +30,9 @@ const Login = () => {
     };
 
     return (
-        <div className="login-container">
-            <div className="login-card">
-                <form onSubmit={handleSubmit} className="login-form">
+        <div className="register-container">
+            <div className="register-card">
+                <form onSubmit={handleSubmit} className="register-form">
                     <div className="form-group">
                         <label htmlFor="email">Email:</label>
                         <input
@@ -54,15 +55,15 @@ const Login = () => {
                         />
                     </div>
 
-                    {errorMessage && <p className="error-message">{errorMessage}</p>}
+                    {error_message && <p className="error-message">{error_message}</p>}
 
                     <button type="submit" className="submit-button" disabled={isLoading}>
-                        {isLoading ? "Loading..." : "Login"}
+                        {isLoading ? "Loading.." : "Enter"}
                     </button>
                 </form>
 
-                <p className="register-link">
-                    Don't have an account? <Link to="/register">Sign up</Link>
+                <p className="login-link">
+                    Don`t have account? <Link to="/register">Registration</Link>
                 </p>
             </div>
         </div>

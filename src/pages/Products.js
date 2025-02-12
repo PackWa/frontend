@@ -86,7 +86,7 @@ const Products = () => {
 
         loadProducts();
         return () => { isMounted = false };
-    }, [token]);
+    }, []);
 
     const handleAddProduct = async (formData) => {
         try {

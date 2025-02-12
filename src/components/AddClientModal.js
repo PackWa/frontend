@@ -1,24 +1,24 @@
 import React, { useState, useEffect } from "react";
 
 const AddClientModal = ({ isOpen, onClose, onSave }) => {
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
+  const [first_name, setFirst_name] = useState("");
+  const [last_name, setLast_name] = useState("");
   const [phone, setPhone] = useState("");
 
   useEffect(() => {
     if (isOpen) {
-      setFirstName("");
-      setLastName("");
+      setFirst_name("");
+      setLast_name("");
       setPhone("");
     }
   }, [isOpen]);
 
   const handleSave = () => {
-    if (!firstName || !lastName || !phone) {
+    if (!first_name || !last_name || !phone) {
       alert("Please fill in all fields!");
       return;
     }
-    onSave({ firstName, lastName, phone });
+    onSave({ first_name: first_name, last_name: last_name, phone });
     onClose();
   };
 
@@ -31,14 +31,14 @@ const AddClientModal = ({ isOpen, onClose, onSave }) => {
           <input
               type="text"
               placeholder="First Name"
-              value={firstName}
-              onChange={(e) => setFirstName(e.target.value)}
+              value={first_name}
+              onChange={(e) => setFirst_name(e.target.value)}
           />
           <input
               type="text"
               placeholder="Last Name"
-              value={lastName}
-              onChange={(e) => setLastName(e.target.value)}
+              value={last_name}
+              onChange={(e) => setLast_name(e.target.value)}
           />
           <input
               type="text"

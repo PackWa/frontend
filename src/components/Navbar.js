@@ -56,8 +56,6 @@ const Navbar = () => {
         return 'Login';
       case '/register':
         return 'Register';
-      default:
-        return 'Manager';
     }
   };
 
