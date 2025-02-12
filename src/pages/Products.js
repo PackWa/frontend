@@ -105,7 +105,9 @@ const Products = () => {
                 await addProductDB(createdProduct);
             }
         } catch (error) {
-            console.error("Error creating product:", error);
+            if (error.response.data.title === "Product`s title already exists for this user") {
+                alert("You can`t have 2 products with the same name")
+            }
         }
     };
 

@@ -52,7 +52,7 @@ export const createProduct = async (productData, token) => {
     });
     return response.data;
   } catch (error) {
-    return null;
+    throw error;
   }
 };
 
