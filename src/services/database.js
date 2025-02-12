@@ -1,3 +1,19 @@
+/**
+ * This file contains helper functions for working with the IndexedDB database
+ * in a PWA application.
+ *
+ * Main functionalities:
+ * - Opening or creating the "pwa-db" database with object stores:
+ *   - "clients" (stores client data)
+ *   - "products" (stores product data)
+ *   - "orders" (stores order data)
+ *   - "users" (stores user data)
+ * - Adding, updating, deleting, and retrieving data from these stores.
+ * - Converting Blob objects to base64.
+ *
+ * This file is intended for local data storage and processing in offline mode.
+ */
+
 const DB_NAME = "pwa-db";
 const DB_VERSION = 1;
 const CLIENTS_STORE = "clients";

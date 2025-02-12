@@ -1,3 +1,24 @@
+/**
+ * Products Component
+ *
+ * This component is responsible for displaying and managing a list of products.
+ * It supports CRUD operations (Create, Read, Update, Delete) for products and
+ * synchronizes data between a local database and a remote server.
+ *
+ * Features:
+ * - Fetches product data from the local database and updates it from the server if online.
+ * - Displays products in a grid format with support for searching.
+ * - Allows users to add, edit, and delete products.
+ * - Handles offline mode by caching products and synchronizing changes when online.
+ * - Supports product images, converting blobs to base64 for local storage.
+ *
+ * Dependencies:
+ * - Uses ProductService for API requests.
+ * - Uses a local database service for offline support.
+ * - Includes UI components for displaying and managing products.
+ */
+
+
 import React, { useState, useEffect } from "react";
 import {
     fetchProducts,

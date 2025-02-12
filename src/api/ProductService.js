@@ -1,3 +1,24 @@
+/**
+ * ProductService Module
+ *
+ * This module provides functions to interact with the backend API for managing products.
+ * It includes functions for fetching product data, creating, updating, and deleting products,
+ * as well as fetching product images. All API requests are secured by passing an authorization
+ * token in the request headers.
+ *
+ * Functions:
+ * - fetchProducts: Retrieves a list of products from the server.
+ * - fetchProductPhoto: Fetches the photo associated with a product by filename.
+ * - createProduct: Sends a POST request to create a new product.
+ * - updateProduct: Sends a PUT request to update an existing product.
+ * - deleteProduct: Sends a DELETE request to remove a product from the database.
+ *
+ * Usage:
+ * - Each function requires an authorization token to make authenticated requests.
+ * - The createProduct function supports sending form data (e.g., product images).
+ */
+
+
 import axios from "axios";
 import config from "../config";
 

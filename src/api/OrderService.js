@@ -1,3 +1,23 @@
+/**
+ * OrderService Module
+ *
+ * This module provides functions for interacting with the backend API to manage orders.
+ * It includes functionalities for fetching, creating, updating, deleting, and retrieving
+ * individual orders. All API requests are authenticated using a bearer token in the request headers.
+ *
+ * Functions:
+ * - fetchOrders: Retrieves a list of orders from the server.
+ * - createOrder: Sends a POST request to create a new order.
+ * - updateOrder: Sends a PUT request to update an existing order.
+ * - deleteOrder: Sends a DELETE request to remove an order from the server.
+ * - getOrderById: Retrieves details of a specific order by its ID.
+ *
+ * Usage:
+ * - Each function requires an authorization token to authenticate requests.
+ * - The order creation and update functions expect the data to be in JSON format.
+ */
+
+
 import axios from "axios";
 import config from "../config";
 

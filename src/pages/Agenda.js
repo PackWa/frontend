@@ -1,3 +1,22 @@
+/**
+ * Agenda Component - Order Management Calendar
+ *
+ * This component provides a calendar view for managing orders. It allows users to:
+ * - View orders in an agenda-style calendar.
+ * - Create, edit, and delete orders.
+ * - Sync orders from an API when online and store them in IndexedDB for offline access.
+ * - Schedule and manage order notifications.
+ *
+ * Main Features:
+ * - Uses react-big-calendar for event visualization.
+ * - Handles offline and online order synchronization.
+ * - Integrates with notification services.
+ *
+ * Dependencies:
+ * - react-big-calendar, moment, IndexedDB services, notification services.
+ */
+
+
 import React, { useState, useEffect } from "react";
 import { Calendar, momentLocalizer } from "react-big-calendar";
 import moment from "moment";
