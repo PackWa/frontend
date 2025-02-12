@@ -85,7 +85,7 @@ const EditOrderModal = ({ isOpen, onClose, onUpdateOrder, order, onDeleteOrder }
         title: order.title,
         client: clients.find(client => client.id === order.client_id) ? { value: order.client_id, label: `${order.client_name}` } : "",
         products: updatedProducts,
-        time: order.date ? new Date(order.date).toISOString().slice(0, 16) : "",
+        time: order.date ? new Date(order.date).toISOString().slice(0, 16) : "", // Форматируем дату для input[type="datetime-local"]
         address: order.address || "",
       });
     }
@@ -123,10 +123,13 @@ const EditOrderModal = ({ isOpen, onClose, onUpdateOrder, order, onDeleteOrder }
       return;
     }
 
+    // Преобразуем время в формат, который ожидает сервер
+    const formattedDate = new Date(orderData.time).toISOString();
+
     const updatedOrder = {
       id: order.id,
       title: orderData.title,
-      date: new Date(orderData.time).toISOString(),
+      start: formattedDate, // Используем отформатированную дату
       client_id: orderData.client?.value || null,
       products: orderData.products,
       address: orderData.address,

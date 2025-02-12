@@ -100,7 +100,7 @@ const Agenda = () => {
       alert("Нет интернет-соединения. Действие невозможно.");
       return;
     }
-
+  
     if (!token) return;
   
     if (isOnline) {
@@ -122,6 +122,7 @@ const Agenda = () => {
   
         // Форматируем дату в ISO 8601 с указанием временной зоны
         const formattedDate = moment(order.start).format("YYYY-MM-DDTHH:mm:ssZ");
+        console.log("formate", formattedDate)
   
         const formattedOrder = {
           title: order.title,
@@ -136,8 +137,10 @@ const Agenda = () => {
   
         let newOrder;
         if (order.id) {
+          // Обновляем существующий заказ
           newOrder = await updateOrder(order.id, formattedOrder, token);
         } else {
+          // Создаем новый заказ
           newOrder = await createOrder(formattedOrder, token);
         }
   
@@ -156,7 +159,16 @@ const Agenda = () => {
             total: newOrder.products.reduce((sum, p) => sum + (p.price_at_order || 0) * (p.quantity || 1), 0),
           };
   
-          setEvents([...events, processedOrder]);
+          // Обновляем состояние events
+          if (order.id) {
+            // Если заказ обновляется, заменяем его в списке
+            setEvents(events.map(event => (event.id === order.id ? processedOrder : event)));
+          } else {
+            // Если заказ новый, добавляем его в список
+            setEvents([...events, processedOrder]);
+          }
+  
+          // Сохраняем заказ в IndexedDB
           addOrder(processedOrder);
           scheduleNotification(processedOrder);
         }
@@ -164,6 +176,7 @@ const Agenda = () => {
         console.error("Ошибка при создании/обновлении заказа:", error);
       }
     } else {
+      // Оффлайн-режим: сохраняем временный заказ
       const tempOrder = { ...order, id: Date.now() }; // Временный ID
       setEvents([...events, tempOrder]);
       addOrder(tempOrder);
