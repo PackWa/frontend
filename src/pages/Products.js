@@ -8,7 +8,7 @@
  * Features:
  * - Fetches product data from the local database and updates it from the server if online.
  * - Displays products in a grid format with support for searching.
- * - Allows users to add, edit, and delete products.
+ * - Allows users to add, edit, and delete products (only in online mod).
  * - Handles offline mode by caching products and synchronizing changes when online.
  * - Supports product images, converting blobs to base64 for local storage.
  *

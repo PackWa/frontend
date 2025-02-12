@@ -9,7 +9,7 @@
  *
  * Key Features:
  * - Fetches client data from the server when online and from the local database when offline.
- * - Allows users to add, edit, and delete clients.
+ * - Allows users to add, edit, and delete clients (only in online mod).
  * - Provides a search bar to filter clients by their name or phone number.
  * - Uses modals for adding and editing clients.
  * - Syncs changes with the server when online.
